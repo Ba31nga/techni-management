@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8fafc; /* light background */
+  --foreground: #0f172a; /* dark text */
+}
+
+.dark {
+  --background: #0f172a; /* dark background */
+  --foreground: #f8fafc; /* light text */
+}
+
+html {
+  direction: rtl;
+}
