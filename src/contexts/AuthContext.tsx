@@ -1,105 +1,62 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { auth, db } from '@/lib/firebase';
-import {
-  onAuthStateChanged,
-  getIdTokenResult,
-  signOut,
-  User,
-} from 'firebase/auth';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
-type CurrentUser = {
+interface AppUser {
   uid: string;
   email: string;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   roles: string[];
-  firstTime: boolean;
-};
+  needsPasswordChange: boolean;
+}
 
-type AuthContextType = {
-  user: User | null;                 // Raw Firebase user
-  currentUser: CurrentUser | null;   // Firestore-enriched user
-  roles: string[];
+interface AuthContextValue {
+  user: AppUser | null;
   loading: boolean;
-  firstTime: boolean;
-};
+}
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  currentUser: null,
-  roles: [],
-  loading: true,
-  firstTime: false,
-});
+const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [firstTime, setFirstTime] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log('🔍 Firebase user detected:', firebaseUser);
-
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {
-          const tokenResult = await getIdTokenResult(firebaseUser);
-          const expirationTimeInMs = new Date(tokenResult.expirationTime).getTime();
-          const isExpired = Date.now() > expirationTimeInMs;
-
-          if (isExpired) {
-            console.warn('⚠️ Token expired, signing out...');
-            await signOut(auth);
-            setUser(null);
-            setCurrentUser(null);
-            setRoles([]);
-            setFirstTime(false);
-            setLoading(false);
-            return;
-          }
-
           const userDocRef = doc(db, 'users', firebaseUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+          const userSnapshot = await getDoc(userDocRef);
 
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            const enrichedUser: CurrentUser = {
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+
+            const appUser: AppUser = {
               uid: firebaseUser.uid,
-              email: firebaseUser.email ?? '',
-              firstname: userData.firstname ?? '',
-              lastname: userData.lastname ?? '',
-              roles: userData.roles ?? [],
-              firstTime: userData.firstTime ?? false,
+              email: userData.email,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              roles: userData.roles || [],
+              needsPasswordChange: userData.needsPasswordChange || false,
             };
 
-            setUser(firebaseUser);
-            setCurrentUser(enrichedUser);
-            setRoles(enrichedUser.roles);
-            setFirstTime(enrichedUser.firstTime);
+            setUser(appUser);
           } else {
-            console.warn('⚠️ משתמש לא קיים במסד הנתונים');
+            console.warn('User document not found in Firestore');
             setUser(null);
-            setCurrentUser(null);
-            setRoles([]);
-            setFirstTime(false);
           }
         } catch (error) {
-          console.error('🚫 שגיאה באימות או שליפת המשתמש:', error);
+          console.error('Error fetching user data:', error);
           setUser(null);
-          setCurrentUser(null);
-          setRoles([]);
-          setFirstTime(false);
         }
       } else {
         setUser(null);
-        setCurrentUser(null);
-        setRoles([]);
-        setFirstTime(false);
       }
 
       setLoading(false);
@@ -109,10 +66,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, currentUser, roles, loading, firstTime }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);
