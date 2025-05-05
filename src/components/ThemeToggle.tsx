@@ -1,5 +1,7 @@
+// src/components/ThemeToggle.tsx
 "use client";
 
+import { useEffect, useState } from "react";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
@@ -7,6 +9,13 @@ import { Moon, Sun } from "lucide-react";
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useThemeToggle();
   const isDark = theme === "dark";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <button
@@ -19,7 +28,7 @@ export default function ThemeToggle() {
       <motion.div
         layout
         className={`
-          absolute top-1 left-1
+          absolute top-1
           ${isDark ? "left-1" : "left-7"}
           w-6 h-6 rounded-full shadow-md flex items-center justify-center
           transition-all duration-300

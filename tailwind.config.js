@@ -10,5 +10,5 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [rtl],
+  plugins: [rtl, require("tailwind-scrollbar")],
 };

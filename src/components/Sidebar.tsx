@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 "use client";
 
 import { useState } from "react";
@@ -35,7 +34,7 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        "h-screen transition-all duration-300",
+        "h-full transition-all duration-300",
         open ? "w-64 px-4" : "w-20 px-2",
         "flex flex-col justify-between",
         "bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow-lg"

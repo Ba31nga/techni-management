@@ -10,15 +10,15 @@
     "zip": "node scripts/zip-project.js"
   },
   "dependencies": {
-    "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
     "firebase": "^11.6.1",
     "framer-motion": "^12.9.4",
     "lucide-react": "^0.507.0",
     "next": "^15.3.1",
-    "postcss": "^8.5.3",
+    "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-rtl": "^0.9.0",
     "zustand": "^5.0.4"
   },
@@ -29,9 +29,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "archiver": "^5.3.2",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
-    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
