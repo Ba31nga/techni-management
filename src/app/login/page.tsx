@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/test-access"); // redirect after login
+      router.push("/"); // redirect after login
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

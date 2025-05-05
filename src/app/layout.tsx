@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           <div className="flex h-screen">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto p-6 md:p-10 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+            <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
               {children}
             </main>
           </div>

@@ -33,9 +33,8 @@ const iconMap: Record<string, React.ElementType> = {
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
-  const { userData, loading } = useAuth();
+  const { userData, loading, logout } = useAuth();
 
-  // DEBUG: הצגת נתוני המשתמש
   useEffect(() => {
     console.log("🧠 userData:", userData);
     console.log("🧠 userData.roles:", userData?.roles);
@@ -43,7 +42,6 @@ export default function Sidebar() {
 
   const roles = (userData?.roles ?? []).map((r: string) => r.toLowerCase());
 
-  // סינון טאבים לפי תפקידים
   const visibleTabs = TABS.filter((tab) =>
     tab.roles.some((role) => roles.includes(role.toLowerCase()))
   );
@@ -54,7 +52,7 @@ export default function Sidebar() {
         "h-full transition-all duration-300",
         open ? "w-64 px-4" : "w-20 px-2",
         "flex flex-col justify-between",
-        "bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow-lg"
+        "bg-white text-gray-900 dark:bg-gray-950 dark:text-white shadow-lg"
       )}
       dir="rtl"
     >
@@ -133,7 +131,10 @@ export default function Sidebar() {
         <div className="px-3">
           <ThemeToggle />
         </div>
-        <button className="flex items-center gap-4 px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+        <button
+          onClick={logout}
+          className="flex items-center gap-4 px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+        >
           <LogOut className="w-5 h-5" />
           <span className={clsx(open ? "block" : "hidden")}>התנתק</span>
         </button>
