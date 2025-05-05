@@ -6,6 +6,4 @@ export interface Tab {
   roles: Role[];
 }
 
-export const TABS: Tab[] = [
-  { label: "test", path: "/test-access", roles: ["User"] },
-];
+export const TABS: Tab[] = [{ label: "דף בית", path: "/", roles: ["User"] }];

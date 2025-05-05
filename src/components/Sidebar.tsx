@@ -28,7 +28,6 @@ const iconMap: Record<string, React.ElementType> = {
   סטטיסטיקות: BarChart2,
   סימניות: Star,
   הגדרות: Settings,
-  test: LayoutDashboard,
 };
 
 export default function Sidebar() {
@@ -63,7 +62,7 @@ export default function Sidebar() {
       <div className="flex items-center justify-between py-4">
         <div className="text-xl font-bold whitespace-nowrap">
           {open ? (
-            "Techni"
+            "טכני - הנהלה"
           ) : (
             <div className="w-8 h-8 bg-gray-300 dark:bg-white rounded-full" />
           )}
