@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <body className="bg-white text-black dark:bg-black dark:text-white scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+      <body className="bg-white text-black dark:bg-gray-900 dark:text-white scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
         <Providers>
           <div className="flex h-screen">
             <Sidebar />
