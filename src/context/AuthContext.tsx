@@ -5,26 +5,36 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
-interface AuthContextValue {
-  user: User | null;
+// טיפוס עבור מסמך המשתמש שנשמר ב-Firestore
+export interface UserData {
+  email: string;
+  firstName: string;
+  lastName: string;
   roles: string[];
   needsPasswordChange: boolean;
+  [key: string]: any; // תמיכה בשדות נוספים בעתיד
+}
+
+// טיפוס עבור הקונטקסט
+interface AuthContextValue {
+  user: User | null;
+  userData: UserData | null;
   loading: boolean;
   logout: () => Promise<void>;
 }
 
+// יצירת הקונטקסט עם ערכים התחלתיים
 const AuthContext = createContext<AuthContextValue>({
   user: null,
-  roles: [],
-  needsPasswordChange: false,
+  userData: null,
   loading: true,
   logout: async () => {},
 });
 
+// Provider שעטוף סביב כל האפליקציה
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
-  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,24 +44,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
 
-        // Fetch roles and flags from Firestore
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          setRoles(data.roles || []);
-          setNeedsPasswordChange(data.needsPasswordChange ?? false);
+          setUserData(userDocSnap.data() as UserData);
         } else {
           console.warn("No user document found in Firestore.");
-          setRoles([]);
-          setNeedsPasswordChange(false);
+          setUserData(null);
         }
       } else {
-        // Logged out
         setUser(null);
-        setRoles([]);
-        setNeedsPasswordChange(false);
+        setUserData(null);
       }
 
       setLoading(false);
@@ -65,12 +69,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, roles, needsPasswordChange, loading, logout }}
-    >
+    <AuthContext.Provider value={{ user, userData, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// hook לשימוש נוח בקונטקסט
 export const useAuth = () => useContext(AuthContext);
