@@ -27,14 +27,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950 transition-colors duration-300">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm space-y-4"
+        className="bg-white dark:bg-gray-900 p-8 rounded shadow-md w-full max-w-sm space-y-4"
       >
-        <h1 className="text-2xl font-semibold text-center">התחברות</h1>
+        <h1 className="text-2xl font-semibold text-center text-gray-900 dark:text-white">
+          התחברות
+        </h1>
+
         {error && (
-          <div className="text-red-600 text-sm text-center">{error}</div>
+          <div className="text-red-600 dark:text-red-400 text-sm text-center">
+            {error}
+          </div>
         )}
 
         <input
@@ -42,7 +47,7 @@ export default function LoginPage() {
           placeholder="אימייל"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 text-right"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded p-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
 
@@ -51,14 +56,14 @@ export default function LoginPage() {
           placeholder="סיסמה"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 text-right"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded p-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 dark:hover:bg-blue-500 transition disabled:opacity-50"
         >
           {loading ? "מתחבר..." : "התחבר"}
         </button>

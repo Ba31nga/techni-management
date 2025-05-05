@@ -1,5 +1,5 @@
 export const roleTranslations: { [key: string]: string } = {
-    "admin": "מנהל",
+    "admin": "אדמין",
     "user": "משתמש",
     "manager": "מנהל צוות",
     "guest": "אורח",

@@ -71,7 +71,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 mt-6 flex flex-col gap-2">
+      <nav className={clsx("flex-1 mt-6 flex flex-col gap-2", !open && "items-center")}>
         {loading ? (
           <div className="text-center text-gray-500">טוען תפריט...</div>
         ) : visibleTabs.length === 0 ? (
@@ -86,30 +86,31 @@ export default function Sidebar() {
                 key={label}
                 href={path}
                 className={clsx(
-                  "flex items-center gap-4 py-2 px-3 rounded-lg group transition-all",
+                  "relative group transition-all rounded-lg",
+                  "flex w-full py-2 px-3",
+                  open ? "justify-start gap-4" : "justify-center",
                   active
                     ? "bg-gray-200 text-gray-900 dark:bg-white dark:text-gray-900 font-semibold"
                     : "hover:bg-gray-100 dark:hover:bg-gray-800 text-inherit"
                 )}
               >
-                <Icon
-                  className={clsx(
-                    "w-5 h-5",
-                    active ? "text-gray-900" : "text-inherit"
-                  )}
-                />
+                <Icon className="w-5 h-5" />
+
+                {/* Show label only when open */}
                 <span
                   className={clsx(
                     "transition-all origin-right",
                     open
-                      ? "opacity-100 scale-100"
+                      ? "ml-2 opacity-100 scale-100"
                       : "opacity-0 scale-0 w-0 h-0 overflow-hidden"
                   )}
                 >
                   {label}
                 </span>
+
+                {/* Tooltip on hover when collapsed */}
                 {!open && (
-                  <span className="absolute right-16 bg-white text-gray-900 text-xs px-2 py-1 rounded shadow-md scale-0 group-hover:scale-100 transition-transform origin-left">
+                  <span className="absolute right-16 bg-white text-gray-900 text-xs px-2 py-1 rounded shadow-md scale-0 group-hover:scale-100 transition-transform origin-left whitespace-nowrap z-10">
                     {label}
                   </span>
                 )}
@@ -120,7 +121,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom actions */}
-      <div className="py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col gap-4">
+      <div className={clsx("py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col gap-4", !open && "items-center")}>
         <Link
           href="/profile"
           className="flex items-center gap-4 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
