@@ -1,175 +1,119 @@
-// Sidebar.tsx – Responsive Sidebar Component using TailwindCSS and tabsConfig
+// src/components/Sidebar.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TABS } from "@/lib/tabsConfig";
-import { useAuth } from "@/context/AuthContext";
+import {
+  LayoutDashboard,
+  Calendar,
+  Bell,
+  BarChart2,
+  Star,
+  Settings,
+  User,
+  LogOut,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import clsx from "clsx";
+
+const NAV_ITEMS = [
+  { label: "דשבורד", href: "/", icon: LayoutDashboard },
+  { label: "לוח שנה", href: "/calendar", icon: Calendar },
+  { label: "התראות", href: "/notifications", icon: Bell },
+  { label: "סטטיסטיקות", href: "/analytics", icon: BarChart2 },
+  { label: "סימניות", href: "/bookmarks", icon: Star },
+  { label: "הגדרות", href: "/settings", icon: Settings },
+];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, userData, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
-  if (!user || !userData) return null;
-
-  const userRoles = userData.roles || [];
-
-  const menuItems = TABS.filter((tab) =>
-    tab.roles.some((role) => userRoles.includes(role))
-  );
-
-  const fullName = `${userData.firstName || ""} ${
-    userData.lastName || ""
-  }`.trim();
+  const [open, setOpen] = useState(true);
 
   return (
-    <>
-      {/* Mobile Hamburger */}
-      <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-2 flex items-center justify-between">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-gray-700 dark:text-gray-200 focus:outline-none"
-        >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
+    <aside
+      className={clsx(
+        "h-screen transition-all duration-300",
+        open ? "w-64 px-4" : "w-20 px-2",
+        "flex flex-col justify-between",
+        "bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow-lg"
+      )}
+      dir="rtl"
+    >
+      {/* Header with logo + toggle */}
+      <div className="flex items-center justify-between py-4">
+        <div className="text-xl font-bold whitespace-nowrap">
+          {open ? (
+            "Techni"
+          ) : (
+            <div className="w-8 h-8 bg-gray-300 dark:bg-white rounded-full" />
+          )}
+        </div>
+        <button onClick={() => setOpen(!open)} className="text-inherit">
+          {open ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
-        <span className="text-lg font-semibold text-gray-800 dark:text-white">
-          Techni-Management
-        </span>
       </div>
 
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar Panel */}
-      <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out
-          ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0
-          ${collapsed ? "w-16" : "w-64"} md:w-64`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4">
-          <span
-            className={`text-xl font-bold text-gray-800 dark:text-white ${
-              collapsed ? "hidden" : "block"
-            }`}
-          >
-            Techni
-          </span>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:inline-flex text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            {collapsed ? (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-2 space-y-1">
-          {menuItems.map((item) => {
-            const active = pathname === item.path;
-            return (
-              <Link
-                href={item.path}
-                key={item.label}
-                className={`flex items-center rounded-md p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition
-                  ${active ? "bg-gray-100 dark:bg-gray-800 font-medium" : ""}`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <span className="w-6 h-6 flex-shrink-0 text-gray-600 dark:text-gray-300">
-                  📄
-                </span>
-                <span
-                  className={`ml-3 truncate ${collapsed ? "hidden" : "inline"}`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Profile & Logout */}
-        <div className="p-2 mt-auto mb-4">
-          <div className="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-            <img
-              src="/avatar.jpg"
-              alt="User"
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <span
-              className={`ml-3 text-gray-800 dark:text-white ${
-                collapsed ? "hidden" : "inline"
-              }`}
+      {/* Navigation */}
+      <nav className="flex-1 mt-6 flex flex-col gap-2">
+        {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <Link
+              key={label}
+              href={href}
+              className={clsx(
+                "flex items-center gap-4 py-2 px-3 rounded-lg group transition-all",
+                active
+                  ? "bg-gray-200 text-gray-900 dark:bg-white dark:text-gray-900 font-semibold"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-inherit"
+              )}
             >
-              {fullName || "משתמש"}
-            </span>
-          </div>
-
-          {/* Theme Toggle */}
-          <div
-            className={`flex justify-center mt-4 ${
-              collapsed ? "hidden" : "block"
-            }`}
-          >
-            <ThemeToggle />
-          </div>
-
-          <button
-            className="flex items-center w-full mt-4 p-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-md"
-            onClick={logout}
-          >
-            <svg
-              className="w-5 h-5 flex-shrink-0 mr-2"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7"
+              <Icon
+                className={clsx(
+                  "w-5 h-5",
+                  active ? "text-gray-900" : "text-inherit"
+                )}
               />
-            </svg>
-            <span className={`${collapsed ? "hidden" : "inline"}`}>התנתק</span>
-          </button>
+              <span
+                className={clsx(
+                  "transition-all origin-right",
+                  open
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-0 w-0 h-0 overflow-hidden"
+                )}
+              >
+                {label}
+              </span>
+              {!open && (
+                <span className="absolute right-16 bg-white text-gray-900 text-xs px-2 py-1 rounded shadow-md scale-0 group-hover:scale-100 transition-transform origin-left">
+                  {label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom actions */}
+      <div className="py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col gap-4">
+        <Link
+          href="/profile"
+          className="flex items-center gap-4 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+        >
+          <User className="w-5 h-5" />
+          <span className={clsx(open ? "block" : "hidden")}>פרופיל</span>
+        </Link>
+        <div className="px-3">
+          <ThemeToggle />
         </div>
-      </aside>
-    </>
+        <button className="flex items-center gap-4 px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+          <LogOut className="w-5 h-5" />
+          <span className={clsx(open ? "block" : "hidden")}>התנתק</span>
+        </button>
+      </div>
+    </aside>
   );
 }
