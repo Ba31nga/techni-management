@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -18,18 +18,36 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import clsx from "clsx";
 
-const NAV_ITEMS = [
-  { label: "דשבורד", href: "/", icon: LayoutDashboard },
-  { label: "לוח שנה", href: "/calendar", icon: Calendar },
-  { label: "התראות", href: "/notifications", icon: Bell },
-  { label: "סטטיסטיקות", href: "/analytics", icon: BarChart2 },
-  { label: "סימניות", href: "/bookmarks", icon: Star },
-  { label: "הגדרות", href: "/settings", icon: Settings },
-];
+import { TABS } from "@/lib/tabsConfig";
+import { useAuth } from "@/context/AuthContext";
+
+const iconMap: Record<string, React.ElementType> = {
+  דשבורד: LayoutDashboard,
+  "לוח שנה": Calendar,
+  התראות: Bell,
+  סטטיסטיקות: BarChart2,
+  סימניות: Star,
+  הגדרות: Settings,
+  test: LayoutDashboard,
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
+  const { userData, loading } = useAuth();
+
+  // DEBUG: הצגת נתוני המשתמש
+  useEffect(() => {
+    console.log("🧠 userData:", userData);
+    console.log("🧠 userData.roles:", userData?.roles);
+  }, [userData]);
+
+  const roles = (userData?.roles ?? []).map((r: string) => r.toLowerCase());
+
+  // סינון טאבים לפי תפקידים
+  const visibleTabs = TABS.filter((tab) =>
+    tab.roles.some((role) => roles.includes(role.toLowerCase()))
+  );
 
   return (
     <aside
@@ -57,43 +75,51 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 mt-6 flex flex-col gap-2">
-        {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={label}
-              href={href}
-              className={clsx(
-                "flex items-center gap-4 py-2 px-3 rounded-lg group transition-all",
-                active
-                  ? "bg-gray-200 text-gray-900 dark:bg-white dark:text-gray-900 font-semibold"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-inherit"
-              )}
-            >
-              <Icon
+        {loading ? (
+          <div className="text-center text-gray-500">טוען תפריט...</div>
+        ) : visibleTabs.length === 0 ? (
+          <div className="text-center text-gray-500">אין טאבים להצגה</div>
+        ) : (
+          visibleTabs.map(({ label, path }) => {
+            const active = pathname === path;
+            const Icon = iconMap[label] ?? LayoutDashboard;
+
+            return (
+              <Link
+                key={label}
+                href={path}
                 className={clsx(
-                  "w-5 h-5",
-                  active ? "text-gray-900" : "text-inherit"
-                )}
-              />
-              <span
-                className={clsx(
-                  "transition-all origin-right",
-                  open
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-0 w-0 h-0 overflow-hidden"
+                  "flex items-center gap-4 py-2 px-3 rounded-lg group transition-all",
+                  active
+                    ? "bg-gray-200 text-gray-900 dark:bg-white dark:text-gray-900 font-semibold"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800 text-inherit"
                 )}
               >
-                {label}
-              </span>
-              {!open && (
-                <span className="absolute right-16 bg-white text-gray-900 text-xs px-2 py-1 rounded shadow-md scale-0 group-hover:scale-100 transition-transform origin-left">
+                <Icon
+                  className={clsx(
+                    "w-5 h-5",
+                    active ? "text-gray-900" : "text-inherit"
+                  )}
+                />
+                <span
+                  className={clsx(
+                    "transition-all origin-right",
+                    open
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-0 w-0 h-0 overflow-hidden"
+                  )}
+                >
                   {label}
                 </span>
-              )}
-            </Link>
-          );
-        })}
+                {!open && (
+                  <span className="absolute right-16 bg-white text-gray-900 text-xs px-2 py-1 rounded shadow-md scale-0 group-hover:scale-100 transition-transform origin-left">
+                    {label}
+                  </span>
+                )}
+              </Link>
+            );
+          })
+        )}
       </nav>
 
       {/* Bottom actions */}

@@ -5,17 +5,15 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
-// טיפוס עבור מסמך המשתמש שנשמר ב-Firestore
 export interface UserData {
   email: string;
   firstName: string;
   lastName: string;
   roles: string[];
   needsPasswordChange: boolean;
-  [key: string]: any; // תמיכה בשדות נוספים בעתיד
+  [key: string]: any;
 }
 
-// טיפוס עבור הקונטקסט
 interface AuthContextValue {
   user: User | null;
   userData: UserData | null;
@@ -23,7 +21,6 @@ interface AuthContextValue {
   logout: () => Promise<void>;
 }
 
-// יצירת הקונטקסט עם ערכים התחלתיים
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   userData: null,
@@ -31,7 +28,6 @@ const AuthContext = createContext<AuthContextValue>({
   logout: async () => {},
 });
 
-// Provider שעטוף סביב כל האפליקציה
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
