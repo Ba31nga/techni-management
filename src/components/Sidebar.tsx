@@ -58,12 +58,16 @@ export default function Sidebar() {
     >
       {/* Header with logo + toggle */}
       <div className="flex items-center justify-between py-4">
-        <div className="text-xl font-bold whitespace-nowrap">
-          {open ? (
-            "טכני - הנהלה"
-          ) : (
-            <div className="w-8 h-8 bg-gray-300 dark:bg-white rounded-full" />
-          )}
+        <div className="flex items-center gap-2">
+          <img
+            src="/logo.png" // Replace with your logo path
+            alt="School Logo"
+            className={clsx(
+              "transition-all",
+              open ? "w-8 h-8" : "w-8 h-8 mx-auto"
+            )}
+          />
+          {open && <span className="text-xl font-bold whitespace-nowrap">טכני - הנהלה</span>}
         </div>
         <button onClick={() => setOpen(!open)} className="text-inherit">
           {open ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
