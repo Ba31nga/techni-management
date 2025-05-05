@@ -14,7 +14,7 @@ export default function RoleGuard({ children }: { children: React.ReactNode }) {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push(`/login?redirect=${pathname}`);
     }
   }, [loading, user, router]);
 

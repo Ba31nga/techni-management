@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { updateEmail, updatePassword } from "firebase/auth";
 import { useAuth } from "@/context/AuthContext";
+import { roleTranslations } from "@/lib/roleTranslations";
 
 export default function ProfilePage() {
   const { user, userData, loading } = useAuth();
@@ -88,7 +89,9 @@ export default function ProfilePage() {
           </div>
           <div className="mt-4 md:mt-0 md:mr-6 text-center md:text-right flex-1">
             <h2 className="text-2xl font-semibold">{firstName} {lastName}</h2>
-            <p className="text-gray-500 dark:text-gray-300">{roles.join(", ")}</p>
+            <p className="text-gray-500 dark:text-gray-300">
+              {roles.map((role) => roleTranslations[role] || role).join(", ")}
+            </p>
           </div>
           {!editMode && (
             <div className="mt-4 md:mt-0 md:ml-auto">
@@ -174,7 +177,7 @@ export default function ProfilePage() {
                 key={role}
                 className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs dark:bg-blue-900 dark:text-blue-200"
               >
-                {role}
+                {roleTranslations[role] || role}
               </span>
             ))}
           </div>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
+import { roleTranslations } from "@/lib/roleTranslations";
 
 export default function UserProfilePage() {
   const { userId } = useParams();
@@ -64,10 +65,11 @@ export default function UserProfilePage() {
                 key={role}
                 className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs dark:bg-blue-900 dark:text-blue-200"
               >
-                {role}
+                {roleTranslations[role] || role}
               </span>
             ))}
           </div>
+
         </div>
 
         <div className="mt-6 text-right">

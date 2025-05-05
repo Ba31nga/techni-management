@@ -1,4 +1,4 @@
-export type Role = "admin" | "tech" | "User";
+export type Role = "admin" | "tech" | "user";
 
 export interface Tab {
   label: string;
@@ -6,4 +6,4 @@ export interface Tab {
   roles: Role[];
 }
 
-export const TABS: Tab[] = [{ label: "דף בית", path: "/", roles: ["User"] }];
+export const TABS: Tab[] = [{ label: "דף בית", path: "/", roles: ["user"] }];
