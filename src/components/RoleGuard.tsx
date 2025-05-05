@@ -9,7 +9,10 @@ export default function RoleGuard({ children }: { children: React.ReactNode }) {
   const { roles } = useAuth();
   const pathname = usePathname();
 
-  const tab = TABS.find((t) => t.path === pathname);
+  // Match tab even if route has subpaths (e.g. /admin/settings)
+  const tab = TABS.find((t) => pathname.startsWith(t.path));
+
+  // Check if user has at least one required role
   const isAuthorized = tab
     ? tab.roles.some((role) => roles?.includes(role))
     : false;
