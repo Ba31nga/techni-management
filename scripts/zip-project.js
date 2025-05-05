@@ -1,12 +1,15 @@
-// scripts/zip-project.js
 const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
 
-const output = fs.createWriteStream(
-  path.join(__dirname, "..", "dist", "techni-management.zip")
-);
+const distDir = path.join(__dirname, "..", "dist");
+const outputPath = path.join(distDir, "techni-management.zip");
 
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir);
+}
+
+const output = fs.createWriteStream(outputPath);
 const archive = archiver("zip", { zlib: { level: 9 } });
 
 output.on("close", () => {
@@ -18,5 +21,11 @@ archive.on("error", (err) => {
 });
 
 archive.pipe(output);
-archive.directory(path.join(__dirname, ".."), false); // zip root folder content
+
+// Zip everything except dist, node_modules, .next
+archive.glob("**/*", {
+  cwd: path.join(__dirname, ".."),
+  ignore: ["dist/**", "node_modules/**", ".next/**"],
+});
+
 archive.finalize();
