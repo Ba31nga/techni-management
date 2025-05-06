@@ -1,4 +1,16 @@
-export type Role = "admin" | "tech" | "user";
+export type Role =
+  | "admin"
+  | "user"
+  | "teacher"
+  | "principal"
+  | "madrit"
+  | "makas"
+  | "mamah"
+  | "tutor"
+  | "logistics"
+  | "armory"
+  | "ralash"
+  | "havaya";
 
 export interface Tab {
   label: string;
