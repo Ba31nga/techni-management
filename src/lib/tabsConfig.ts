@@ -17,4 +17,11 @@ export interface Tab {
   roles: Role[];
 }
 
-export const TABS: Tab[] = [{ label: "דף בית", path: "/", roles: ["user"] }];
+export const TABS: Tab[] = [
+  { label: "דף בית", path: "/", roles: ["user"] },
+  {
+    label: "ניהול משתמשים",
+    path: "/user-management",
+    roles: ["admin"],
+  },
+];
