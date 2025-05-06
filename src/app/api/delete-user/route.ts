@@ -1,34 +1,34 @@
-import { NextResponse } from "next/server";
-import admin from "firebase-admin";
-import { getApps, cert } from "firebase-admin/app";
+// src/app/api/delete-user/route.ts
 
-// Import the service account key JSON file
+import { NextResponse } from "next/server";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import serviceAccount from "@/lib/firebase-admin/serviceAccountKey.json";
 
-// Initialize Firebase Admin only once
+// Initialize Firebase Admin SDK only once
 if (!getApps().length) {
-  admin.initializeApp({
-    credential: cert(serviceAccount as admin.ServiceAccount),
+  initializeApp({
+    credential: cert(serviceAccount as any),
   });
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { uid } = body;
+    const { email } = await req.json();
 
-    if (!uid) {
-      return NextResponse.json({ error: "Missing user UID" }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "Missing email" }, { status: 400 });
     }
 
-    await admin.auth().deleteUser(uid);
+    // Get user by email
+    const userRecord = await getAuth().getUserByEmail(email);
+
+    // Delete from Firebase Authentication
+    await getAuth().deleteUser(userRecord.uid);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting user:", error);
-    return NextResponse.json(
-      { error: "Failed to delete user" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

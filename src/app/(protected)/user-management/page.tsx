@@ -1,5 +1,3 @@
-// src/app/(protected)/users/page.tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -91,17 +89,17 @@ export default function UsersPage() {
     const confirmed = confirm("האם אתה בטוח שברצונך למחוק את המשתמש?");
     if (!confirmed) return;
 
-    // מחיקה מ-Firestore
     await deleteDoc(doc(db, "users", id));
     setUsers((prev) => prev.filter((u) => u.id !== id));
 
-    // מחיקה מהאימות
     try {
-      await fetch("/api/delete-user", {
+      const res = await fetch("/api/delete-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete");
     } catch (error) {
       console.error("Error deleting user from Auth:", error);
     }
@@ -151,20 +149,18 @@ export default function UsersPage() {
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
                 <td className="px-6 py-4 align-top">
                   <div className="flex flex-wrap gap-1 justify-start">
-                    {Array.isArray(user.roles) &&
-                      user.roles.map((role) => {
-                        const roleClass =
-                          roleColors[role as string] ||
-                          "bg-gray-600 text-white";
-                        return (
-                          <span
-                            key={role}
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
-                          >
-                            {roleTranslations[role] || role}
-                          </span>
-                        );
-                      })}
+                    {user.roles.map((role) => {
+                      const roleClass =
+                        roleColors[role as string] || "bg-gray-600 text-white";
+                      return (
+                        <span
+                          key={role}
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
+                        >
+                          {roleTranslations[role] || role}
+                        </span>
+                      );
+                    })}
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -193,7 +189,6 @@ export default function UsersPage() {
         </table>
       </div>
 
-      {/* עריכת משתמש */}
       {editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-[#2f3136] p-6 rounded-lg shadow-xl w-full max-w-md text-white">
