@@ -6,9 +6,8 @@ export const roleTranslations: { [key: string]: string } = {
   madrit: 'מד"ר/ית',
   makas: 'מק"ס',
   mamah: 'ממ"ח',
-  tutor: "חונך/ת",
+  tutor: "חונכת",
   logistics: "לוגיסטיקה",
   armory: "נשקייה",
   ralash: 'רל"ש/ית',
-  havaya: 'רכז/ת חווי"ה',
 };

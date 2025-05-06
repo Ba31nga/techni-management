@@ -9,8 +9,7 @@ export type Role =
   | "tutor"
   | "logistics"
   | "armory"
-  | "ralash"
-  | "havaya";
+  | "ralash";
 
 export interface Tab {
   label: string;
