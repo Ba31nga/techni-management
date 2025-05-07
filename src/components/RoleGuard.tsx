@@ -24,7 +24,9 @@ export default function RoleGuard({ children }: { children: React.ReactNode }) {
   }
 
   // Match tab even if route has subpaths (e.g. /admin/settings)
-  const tab = TABS.find((t) => pathname.startsWith(t.path));
+  const tab = TABS.sort((a, b) => b.path.length - a.path.length).find((t) =>
+    pathname.startsWith(t.path)
+  );
 
   const userRoles = userData?.roles || [];
 
