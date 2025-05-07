@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "zip": "node scripts/zip-project.js"
+    "zip": "node scripts/zip-project.js",
+    "generate-txt": "node scripts/dump-src-to-text.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
