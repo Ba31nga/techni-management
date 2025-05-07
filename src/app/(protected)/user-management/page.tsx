@@ -176,7 +176,6 @@ export default function UsersPage() {
       <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
         ניהול משתמשים
       </h1>
-
       <div className="flex gap-4 flex-wrap items-center">
         <input
           type="text"
@@ -192,7 +191,6 @@ export default function UsersPage() {
           הוסף משתמש
         </button>
       </div>
-
       <div className="relative overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2f3136]">
         <table className="w-full text-sm text-gray-900 dark:text-gray-300">
           <thead className="bg-gray-100 dark:bg-[#202225] text-gray-900 dark:text-white">
@@ -254,55 +252,60 @@ export default function UsersPage() {
           </tbody>
         </table>
       </div>
-
       {/* עריכת משתמש */}
       {editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-[#2f3136] p-6 rounded-lg shadow-xl w-full max-w-md text-white">
+          <div className="bg-white text-black dark:bg-[#2f3136] dark:text-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <h2 className="text-2xl font-semibold mb-6">עריכת משתמש</h2>
 
-            <label className="block mb-1 text-sm text-gray-300">שם פרטי</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+              שם פרטי
+            </label>
             <input
               type="text"
               value={editingUser.firstName}
               onChange={(e) =>
                 setEditingUser({ ...editingUser, firstName: e.target.value })
               }
-              className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded mb-4"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded mb-4"
             />
 
-            <label className="block mb-1 text-sm text-gray-300">שם משפחה</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+              שם משפחה
+            </label>
             <input
               type="text"
               value={editingUser.lastName}
               onChange={(e) =>
                 setEditingUser({ ...editingUser, lastName: e.target.value })
               }
-              className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded mb-4"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded mb-4"
             />
 
-            <label className="block mb-1 text-sm text-gray-300">אימייל</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+              אימייל
+            </label>
             <input
               type="email"
               value={editingUser.email}
               onChange={(e) =>
                 setEditingUser({ ...editingUser, email: e.target.value })
               }
-              className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded mb-4"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded mb-4"
             />
 
-            <label className="block mb-1 text-sm text-gray-300">
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
               סיסמה חדשה
             </label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded mb-6"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded mb-6"
               placeholder="(אופציונלי)"
             />
 
-            <label className="block mb-2 text-sm text-gray-300">
+            <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
               הרשאות נוכחיות
             </label>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -310,7 +313,7 @@ export default function UsersPage() {
                 .filter((r) => r !== "user")
                 .map((role) => {
                   const roleClass =
-                    roleColors[role as string] || "bg-gray-600 text-white";
+                    roleColors[role] || "bg-gray-600 text-white";
                   return (
                     <div
                       key={role}
@@ -328,7 +331,7 @@ export default function UsersPage() {
                 })}
             </div>
 
-            <label className="block mb-2 text-sm text-gray-300">
+            <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
               הוסף תפקיד
             </label>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -340,7 +343,7 @@ export default function UsersPage() {
                   <button
                     key={role}
                     onClick={() => addRole(role)}
-                    className="border border-gray-600 text-gray-300 px-3 py-1 rounded-full text-xs hover:bg-gray-600"
+                    className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-xs hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     {roleTranslations[role] || role}
                   </button>
@@ -350,13 +353,13 @@ export default function UsersPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setEditingUser(null)}
-                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600"
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white"
               >
                 ביטול
               </button>
               <button
                 onClick={() => updateUserDetails(editingUser)}
-                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500"
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white"
               >
                 שמור
               </button>
@@ -364,16 +367,15 @@ export default function UsersPage() {
           </div>
         </div>
       )}
-
       {/* הוספת משתמש */}
       {newUserModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-[#2f3136] p-6 rounded-lg shadow-xl w-full max-w-md text-white">
+        <div className="fixed top-0 left-0 right-0 bottom-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
+          <div className="bg-white text-black dark:bg-[#2f3136] dark:text-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <h2 className="text-2xl font-semibold mb-6">הוספת משתמש חדש</h2>
 
             {["firstName", "lastName", "email", "password"].map((field) => (
               <div key={field} className="mb-4">
-                <label className="block mb-1 text-sm text-gray-300">
+                <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
                   {field === "firstName"
                     ? "שם פרטי"
                     : field === "lastName"
@@ -388,12 +390,14 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setNewUser({ ...newUser, [field]: e.target.value })
                   }
-                  className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded"
+                  className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded"
                 />
               </div>
             ))}
 
-            <label className="block mb-2 text-sm text-gray-300">הרשאות</label>
+            <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
+              הרשאות
+            </label>
             <div className="flex flex-wrap gap-2 mb-6">
               {Object.keys(roleTranslations)
                 .filter((r) => r !== "user")
@@ -408,10 +412,10 @@ export default function UsersPage() {
                           : [...prev.roles, role],
                       }))
                     }
-                    className={`border px-3 py-1 rounded-full text-xs ${
+                    className={`border px-3 py-1 rounded-full text-xs transition-colors duration-150 ${
                       newUser.roles.includes(role)
-                        ? "bg-blue-600 text-white"
-                        : "border-gray-600 text-gray-300"
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     {roleTranslations[role]}
@@ -422,14 +426,14 @@ export default function UsersPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setNewUserModalOpen(false)}
-                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600"
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white"
               >
                 ביטול
               </button>
               <button
                 onClick={createNewUser}
                 disabled={creating}
-                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
               >
                 {creating ? "יוצר..." : "צור"}
               </button>
