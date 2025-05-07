@@ -202,39 +202,32 @@ export default function MakasimManagementPage() {
             onChange={(e) => setSearchMakas(e.target.value)}
             className="mb-4 w-full md:w-1/2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:bg-gray-800 dark:text-white"
           />
-          <div className="overflow-x-auto rounded shadow">
-            <table className="min-w-full bg-white dark:bg-gray-900">
-              <thead className="bg-gray-100 dark:bg-gray-800">
+          <div className="overflow-x-auto rounded shadow border border-gray-200 dark:border-gray-700">
+            <table className="min-w-full bg-white dark:bg-[#2f3136] text-gray-900 dark:text-gray-200">
+              <thead className="bg-gray-100 dark:bg-[#202225]">
                 <tr>
-                  <th className="px-4 py-2 text-right text-gray-700 dark:text-gray-200">
-                    שם
-                  </th>
-                  <th className="px-4 py-2 text-right text-gray-700 dark:text-gray-200">
-                    שכבה
-                  </th>
-                  <th className="px-4 py-2 text-right text-gray-700 dark:text-gray-200">
-                    כיתה
-                  </th>
+                  <th className="px-4 py-2 text-right">שם</th>
+                  <th className="px-4 py-2 text-right">שכבה</th>
+                  <th className="px-4 py-2 text-right">כיתה</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMakas.map((user) => (
-                  <tr key={user.id} className="border-b dark:border-gray-700">
-                    <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
-                      {user.name}
-                    </td>
+                  <tr
+                    key={user.id}
+                    className="border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#36393f]"
+                  >
+                    <td className="px-4 py-2 text-right">{user.name}</td>
                     <td className="px-4 py-2">
                       {currentUserData.role === "mamah" ? (
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {user.layer}
-                        </span>
+                        <span>{user.layer}</span>
                       ) : (
                         <select
                           value={user.layer || ""}
                           onChange={(e) =>
                             handleLayerChange(user.id, e.target.value)
                           }
-                          className="w-full bg-gray-50 dark:bg-gray-700 border rounded px-2 py-1 text-gray-900 dark:text-gray-100"
+                          className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
                         >
                           <option value="" disabled>
                             בחר שכבה
@@ -253,7 +246,7 @@ export default function MakasimManagementPage() {
                         onChange={(e) =>
                           handleClassChange(user.id, e.target.value)
                         }
-                        className="w-full bg-gray-50 dark:bg-gray-700 border rounded px-2 py-1 text-gray-900 dark:text-gray-100"
+                        className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
                       >
                         <option value="" disabled>
                           בחר כיתה
@@ -273,8 +266,8 @@ export default function MakasimManagementPage() {
         </section>
       )}
 
-      {["admin", "madar"].includes(currentUserData.role) &&
-        activeTab === "mamah" && (
+      {activeTab === "mamah" &&
+        ["admin", "madar"].includes(currentUserData.role) && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               רשימת ממ"חים
@@ -286,31 +279,28 @@ export default function MakasimManagementPage() {
               onChange={(e) => setSearchMamah(e.target.value)}
               className="mb-4 w-full md:w-1/2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:bg-gray-800 dark:text-white"
             />
-            <div className="overflow-x-auto rounded shadow">
-              <table className="min-w-full bg-white dark:bg-gray-900">
-                <thead className="bg-gray-100 dark:bg-gray-800">
+            <div className="overflow-x-auto rounded shadow border border-gray-200 dark:border-gray-700">
+              <table className="min-w-full bg-white dark:bg-[#2f3136] text-gray-900 dark:text-gray-200">
+                <thead className="bg-gray-100 dark:bg-[#202225]">
                   <tr>
-                    <th className="px-4 py-2 text-right text-gray-700 dark:text-gray-200">
-                      שם
-                    </th>
-                    <th className="px-4 py-2 text-right text-gray-700 dark:text-gray-200">
-                      שכבה
-                    </th>
+                    <th className="px-4 py-2 text-right">שם</th>
+                    <th className="px-4 py-2 text-right">שכבה</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredMamah.map((user) => (
-                    <tr key={user.id} className="border-b dark:border-gray-700">
-                      <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
-                        {user.name}
-                      </td>
+                    <tr
+                      key={user.id}
+                      className="border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#36393f]"
+                    >
+                      <td className="px-4 py-2 text-right">{user.name}</td>
                       <td className="px-4 py-2">
                         <select
                           value={user.layer || ""}
                           onChange={(e) =>
                             handleLayerChange(user.id, e.target.value)
                           }
-                          className="w-full bg-gray-50 dark:bg-gray-700 border rounded px-2 py-1 text-gray-900 dark:text-gray-100"
+                          className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
                         >
                           <option value="" disabled>
                             בחר שכבה
