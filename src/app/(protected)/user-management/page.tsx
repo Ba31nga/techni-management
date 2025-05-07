@@ -9,6 +9,7 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  setDoc,
 } from "firebase/firestore";
 import { UserData } from "@/context/AuthContext";
 import { roleTranslations } from "@/lib/roleTranslations";
@@ -29,12 +30,22 @@ const roleColors: Record<string, string> = {
 };
 
 export default function UsersPage() {
-  const { userData } = useAuth();
+  const { user, userData } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [newPassword, setNewPassword] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [creating, setCreating] = useState(false);
+
+  const [newUserModalOpen, setNewUserModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    roles: ["user"],
+  });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -105,11 +116,58 @@ export default function UsersPage() {
     }
   };
 
-  const filteredUsers = users.filter((user) =>
-    `${user.firstName} ${user.lastName} ${user.email}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+  const createNewUser = async () => {
+    setCreating(true);
+    try {
+      const res = await fetch("/api/create-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      await setDoc(doc(db, "users", data.uid), {
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        roles: newUser.roles,
+        needsPasswordChange: true,
+      });
+
+      setUsers((prev) => [
+        ...prev,
+        {
+          id: data.uid,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          roles: newUser.roles,
+          needsPasswordChange: true,
+        },
+      ]);
+      setNewUserModalOpen(false);
+      setNewUser({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        roles: ["user"],
+      });
+    } catch (err) {
+      alert("שגיאה ביצירת משתמש: " + (err as any).message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const filteredUsers = users
+    .filter((user) =>
+      `${user.firstName} ${user.lastName} ${user.email}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    )
+    .filter((u) => u.id !== user?.uid);
 
   if (loading) return <div className="p-6 text-center">טוען משתמשים...</div>;
 
@@ -119,13 +177,21 @@ export default function UsersPage() {
         ניהול משתמשים
       </h1>
 
-      <input
-        type="text"
-        placeholder="חפש לפי שם או אימייל..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full max-w-sm p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white"
-      />
+      <div className="flex gap-4 flex-wrap items-center">
+        <input
+          type="text"
+          placeholder="חפש לפי שם או אימייל..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-sm p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white"
+        />
+        <button
+          onClick={() => setNewUserModalOpen(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          הוסף משתמש
+        </button>
+      </div>
 
       <div className="relative overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2f3136]">
         <table className="w-full text-sm text-gray-900 dark:text-gray-300">
@@ -189,6 +255,7 @@ export default function UsersPage() {
         </table>
       </div>
 
+      {/* עריכת משתמש */}
       {editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-[#2f3136] p-6 rounded-lg shadow-xl w-full max-w-md text-white">
@@ -292,6 +359,79 @@ export default function UsersPage() {
                 className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500"
               >
                 שמור
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* הוספת משתמש */}
+      {newUserModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-[#2f3136] p-6 rounded-lg shadow-xl w-full max-w-md text-white">
+            <h2 className="text-2xl font-semibold mb-6">הוספת משתמש חדש</h2>
+
+            {["firstName", "lastName", "email", "password"].map((field) => (
+              <div key={field} className="mb-4">
+                <label className="block mb-1 text-sm text-gray-300">
+                  {field === "firstName"
+                    ? "שם פרטי"
+                    : field === "lastName"
+                    ? "שם משפחה"
+                    : field === "email"
+                    ? "אימייל"
+                    : "סיסמה זמנית"}
+                </label>
+                <input
+                  type={field === "password" ? "password" : "text"}
+                  value={(newUser as any)[field]}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, [field]: e.target.value })
+                  }
+                  className="w-full border border-gray-700 bg-[#202225] text-white p-2 rounded"
+                />
+              </div>
+            ))}
+
+            <label className="block mb-2 text-sm text-gray-300">הרשאות</label>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {Object.keys(roleTranslations)
+                .filter((r) => r !== "user")
+                .map((role) => (
+                  <button
+                    key={role}
+                    onClick={() =>
+                      setNewUser((prev) => ({
+                        ...prev,
+                        roles: prev.roles.includes(role)
+                          ? prev.roles.filter((r) => r !== role)
+                          : [...prev.roles, role],
+                      }))
+                    }
+                    className={`border px-3 py-1 rounded-full text-xs ${
+                      newUser.roles.includes(role)
+                        ? "bg-blue-600 text-white"
+                        : "border-gray-600 text-gray-300"
+                    }`}
+                  >
+                    {roleTranslations[role]}
+                  </button>
+                ))}
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setNewUserModalOpen(false)}
+                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={createNewUser}
+                disabled={creating}
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50"
+              >
+                {creating ? "יוצר..." : "צור"}
               </button>
             </div>
           </div>
