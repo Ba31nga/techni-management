@@ -18,10 +18,15 @@ export interface Tab {
 }
 
 export const TABS: Tab[] = [
-  { label: "דף בית", path: "/", roles: ["user"] },
   {
     label: "ניהול משתמשים",
     path: "/user-management",
     roles: ["admin"],
   },
+  {
+    label: 'המק"סים שלי',
+    path: "/my-makasim",
+    roles: ["madrit", "mamah", "admin"],
+  },
+  { label: "דף בית", path: "/", roles: ["user"] },
 ];
