@@ -12,22 +12,9 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { UserData } from "@/context/AuthContext";
-import { roleTranslations } from "@/lib/roleTranslations";
 import { X, Trash2 } from "lucide-react";
 
-const roleColors: Record<string, string> = {
-  admin: "bg-blue-600 text-white",
-  teacher: "bg-green-600 text-white",
-  principal: "bg-blue-400 text-white",
-  madrit: "bg-blue-500 text-white",
-  makas: "bg-yellow-500 text-black",
-  mamah: "bg-red-500 text-white",
-  tutor: "bg-pink-500 text-white",
-  logistics: "bg-orange-500 text-white",
-  armory: "bg-gray-600 text-white",
-  ralash: "bg-cyan-600 text-white",
-  user: "bg-gray-500 text-white",
-};
+type RoleMap = Record<string, { color: string; name: string }>;
 
 export default function UsersPage() {
   const { user, userData } = useAuth();
@@ -37,6 +24,7 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [creating, setCreating] = useState(false);
+  const [roleMap, setRoleMap] = useState<RoleMap>({});
 
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -48,9 +36,20 @@ export default function UsersPage() {
   });
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const snapshot = await getDocs(collection(db, "users"));
-      const usersList = snapshot.docs.map((doc) => {
+    const fetchRolesAndUsers = async () => {
+      const roleSnapshot = await getDocs(collection(db, "roles"));
+      const fetchedRoleMap: RoleMap = {};
+      roleSnapshot.forEach((doc) => {
+        const data = doc.data();
+        fetchedRoleMap[doc.id] = {
+          color: data.color || "bg-gray-600 text-white",
+          name: data.name || doc.id,
+        };
+      });
+      setRoleMap(fetchedRoleMap);
+
+      const userSnapshot = await getDocs(collection(db, "users"));
+      const usersList = userSnapshot.docs.map((doc) => {
         const data = doc.data() as UserData;
         return {
           ...data,
@@ -61,7 +60,8 @@ export default function UsersPage() {
       setUsers(usersList);
       setLoading(false);
     };
-    fetchUsers();
+
+    fetchRolesAndUsers();
   }, []);
 
   const updateUserDetails = async (updatedUser: UserData) => {
@@ -215,13 +215,14 @@ export default function UsersPage() {
                   <div className="flex flex-wrap gap-1 justify-start">
                     {user.roles.map((role) => {
                       const roleClass =
-                        roleColors[role as string] || "bg-gray-600 text-white";
+                        roleMap[role]?.color || "bg-gray-600 text-white";
+                      const roleName = roleMap[role]?.name || role;
                       return (
                         <span
                           key={role}
                           className={`px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
                         >
-                          {roleTranslations[role] || role}
+                          {roleName}
                         </span>
                       );
                     })}
@@ -252,6 +253,7 @@ export default function UsersPage() {
           </tbody>
         </table>
       </div>
+
       {/* עריכת משתמש */}
       {editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -313,13 +315,14 @@ export default function UsersPage() {
                 .filter((r) => r !== "user")
                 .map((role) => {
                   const roleClass =
-                    roleColors[role] || "bg-gray-600 text-white";
+                    roleMap[role]?.color || "bg-gray-600 text-white";
+                  const roleName = roleMap[role]?.name || role;
                   return (
                     <div
                       key={role}
                       className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
                     >
-                      {roleTranslations[role] || role}
+                      {roleName}
                       <button
                         onClick={() => removeRole(role)}
                         className="ml-1 text-white hover:text-red-400"
@@ -335,7 +338,7 @@ export default function UsersPage() {
               הוסף תפקיד
             </label>
             <div className="flex flex-wrap gap-2 mb-6">
-              {Object.keys(roleTranslations)
+              {Object.keys(roleMap)
                 .filter(
                   (role) => role !== "user" && !editingUser.roles.includes(role)
                 )
@@ -345,7 +348,7 @@ export default function UsersPage() {
                     onClick={() => addRole(role)}
                     className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-xs hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
-                    {roleTranslations[role] || role}
+                    {roleMap[role]?.name || role}
                   </button>
                 ))}
             </div>
@@ -367,6 +370,7 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
       {/* הוספת משתמש */}
       {newUserModalOpen && (
         <div className="fixed top-0 left-0 right-0 bottom-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
@@ -399,7 +403,7 @@ export default function UsersPage() {
               הרשאות
             </label>
             <div className="flex flex-wrap gap-2 mb-6">
-              {Object.keys(roleTranslations)
+              {Object.keys(roleMap)
                 .filter((r) => r !== "user")
                 .map((role) => (
                   <button
@@ -418,7 +422,7 @@ export default function UsersPage() {
                         : "border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300"
                     }`}
                   >
-                    {roleTranslations[role]}
+                    {roleMap[role]?.name || role}
                   </button>
                 ))}
             </div>
