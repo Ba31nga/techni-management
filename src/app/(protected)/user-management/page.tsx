@@ -602,12 +602,6 @@ export default function UsersPage() {
           <div className="p-6 space-y-6" dir="rtl">
             {/* Add Role Button and Search */}
             <div className="flex gap-4 flex-wrap items-center">
-              <button
-                onClick={() => setNewRoleModalOpen(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              >
-                הוסף תפקיד
-              </button>
               <input
                 type="text"
                 placeholder="חפש לפי מזהה או שם תפקיד..."
@@ -615,6 +609,12 @@ export default function UsersPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full max-w-sm p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white"
               />
+              <button
+                onClick={() => setNewRoleModalOpen(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                הוסף תפקיד
+              </button>
             </div>
 
             {/* Roles Table */}
