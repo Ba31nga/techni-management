@@ -48,7 +48,7 @@ export default function UsersPage() {
       roleSnapshot.forEach((doc) => {
         const data = doc.data();
         fetchedRoleMap[doc.id] = {
-          color: data.color || "bg-gray-600 text-white",
+          color: data.color || "#4b5563", // fallback to a gray hex color
           name: data.name || doc.id,
         };
       });
@@ -290,15 +290,29 @@ export default function UsersPage() {
                       <td className="px-6 py-4 align-top">
                         <div className="flex flex-wrap gap-1 justify-start">
                           {user.roles.map((role) => {
-                            const roleClass =
-                              roleMap[role]?.color || "bg-gray-600 text-white";
-                            const roleName = roleMap[role]?.name || role;
+                            const color = roleMap[role]?.color || "#4b5563";
+                            const name = roleMap[role]?.name || role;
+
+                            // Convert hex to RGB
+                            const hex = color.replace("#", "");
+                            const r = parseInt(hex.substring(0, 2), 16);
+                            const g = parseInt(hex.substring(2, 4), 16);
+                            const b = parseInt(hex.substring(4, 6), 16);
+                            const brightness =
+                              (r * 299 + g * 587 + b * 114) / 1000;
+                            const textColor =
+                              brightness > 220 ? "#000" : "#fff";
+
                             return (
                               <span
                                 key={role}
-                                className={`px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
+                                className="px-3 py-1 rounded-full text-xs font-medium"
+                                style={{
+                                  backgroundColor: color,
+                                  color: textColor,
+                                }}
                               >
-                                {roleName}
+                                {name}
                               </span>
                             );
                           })}
@@ -330,7 +344,6 @@ export default function UsersPage() {
               </table>
             </div>
 
-            {/* עריכת משתמש */}
             {editingUser && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div className="bg-white text-black dark:bg-[#2f3136] dark:text-white p-6 rounded-lg shadow-xl w-full max-w-md">
@@ -396,18 +409,31 @@ export default function UsersPage() {
                     {editingUser.roles
                       .filter((r) => r !== "user")
                       .map((role) => {
-                        const roleClass =
-                          roleMap[role]?.color || "bg-gray-600 text-white";
-                        const roleName = roleMap[role]?.name || role;
+                        const color = roleMap[role]?.color || "#4b5563";
+                        const name = roleMap[role]?.name || role;
+
+                        // Convert hex to RGB
+                        const hex = color.replace("#", "");
+                        const r = parseInt(hex.substring(0, 2), 16);
+                        const g = parseInt(hex.substring(2, 4), 16);
+                        const b = parseInt(hex.substring(4, 6), 16);
+                        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                        const textColor = brightness > 210 ? "#000" : "#fff";
+
                         return (
                           <div
                             key={role}
-                            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${roleClass}`}
+                            className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: color,
+                              color: textColor,
+                            }}
                           >
-                            {roleName}
+                            {name}
                             <button
                               onClick={() => removeRole(role)}
-                              className="ml-1 text-white hover:text-red-400"
+                              className="ml-1"
+                              style={{ color: textColor }}
                             >
                               <X size={12} />
                             </button>
@@ -415,7 +441,6 @@ export default function UsersPage() {
                         );
                       })}
                   </div>
-
                   <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
                     הוסף תפקיד
                   </label>
@@ -536,9 +561,8 @@ export default function UsersPage() {
         </>
       ) : (
         <>
-          {" "}
-          <div className="mt-10">
-            <div className="flex flex-wrap gap-4 mb-6">
+          <div className="mt-10 space-y-6">
+            <div className="flex flex-wrap items-center gap-4">
               <input
                 type="text"
                 placeholder="מזהה תפקיד (id)"
@@ -553,13 +577,17 @@ export default function UsersPage() {
                 onChange={(e) => setNewRoleName(e.target.value)}
                 className="p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#202225] text-black dark:text-white"
               />
-              <input
-                type="text"
-                placeholder='מחלקת צבע (למשל "bg-green-600 text-white")'
-                value={newRoleColor}
-                onChange={(e) => setNewRoleColor(e.target.value)}
-                className="p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#202225] text-black dark:text-white w-full sm:w-auto flex-1"
-              />
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-700 dark:text-gray-300">
+                  בחר צבע
+                </label>
+                <input
+                  type="color"
+                  value={newRoleColor}
+                  onChange={(e) => setNewRoleColor(e.target.value)}
+                  className="w-10 h-10 rounded border border-gray-300 dark:border-gray-700 cursor-pointer"
+                />
+              </div>
               <button
                 onClick={addNewRole}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -568,32 +596,36 @@ export default function UsersPage() {
               </button>
             </div>
 
-            <div className="overflow-x-auto rounded border border-gray-300 dark:border-gray-600">
-              <table className="w-full text-sm text-right text-gray-900 dark:text-white">
-                <thead className="bg-gray-100 dark:bg-[#202225]">
+            <div className="relative overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2f3136]">
+              <table className="w-full text-sm text-gray-900 dark:text-gray-300">
+                <thead className="bg-gray-100 dark:bg-[#202225] text-gray-900 dark:text-white">
                   <tr>
-                    <th className="px-4 py-2">ID</th>
-                    <th className="px-4 py-2">שם</th>
-                    <th className="px-4 py-2">צבע</th>
-                    <th className="px-4 py-2">פעולות</th>
+                    <th className="px-6 py-3 text-right">ID</th>
+                    <th className="px-6 py-3 text-right">שם</th>
+                    <th className="px-6 py-3 text-right">צבע</th>
+                    <th className="px-6 py-3 text-center">פעולות</th>
                   </tr>
                 </thead>
                 <tbody>
                   {Object.entries(roleMap).map(([roleId, { name, color }]) => (
                     <tr
                       key={roleId}
-                      className="border-t border-gray-200 dark:border-gray-700"
+                      className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#36393f]"
                     >
-                      <td className="px-4 py-2">{roleId}</td>
-                      <td className="px-4 py-2">{name}</td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${color}`}
-                        >
-                          {name}
-                        </span>
+                      <td className="px-6 py-4 whitespace-nowrap">{roleId}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{name}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-5 h-5 inline-block rounded-full border border-gray-400"
+                            style={{ backgroundColor: color }}
+                          ></span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            {color}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => deleteRole(roleId)}
                           className="text-red-600 hover:text-red-800 text-sm"
