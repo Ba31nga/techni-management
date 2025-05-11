@@ -250,6 +250,9 @@ export default function UsersPage() {
       {activeTab === "users" ? (
         <>
           <div className="p-6 space-y-6" dir="rtl">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              ניהול משתמשים
+            </h1>
             <div className="flex gap-4 flex-wrap items-center">
               <input
                 type="text"
@@ -538,6 +541,10 @@ export default function UsersPage() {
         <>
           {" "}
           <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+              ניהול תפקידים
+            </h2>
+
             <div className="flex flex-wrap gap-4 mb-6">
               <input
                 type="text"
