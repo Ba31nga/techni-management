@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { UserData } from "@/context/AuthContext";
 import { X, Trash2 } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
 
 // TYPES
 
@@ -31,6 +32,11 @@ export default function UsersPage() {
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleColor, setNewRoleColor] = useState("");
   const [activeTab, setActiveTab] = useState<"users" | "roles">("users");
+  const [editingRoleColor, setEditingRoleColor] = useState("#000000");
+  const [editingRoleId, setEditingRoleId] = useState("");
+  const [editingRoleName, setEditingRoleName] = useState("");
+  const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
+  const [newRoleModalOpen, setNewRoleModalOpen] = useState(false);
 
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -122,6 +128,32 @@ export default function UsersPage() {
     }
   };
 
+  const updateRole = async (roleId: string) => {
+    if (!roleId || !editingRoleName || !editingRoleColor) {
+      alert("אנא מלא את כל השדות");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "roles", roleId), {
+        name: editingRoleName,
+        color: editingRoleColor,
+      });
+
+      setRoleMap((prev) => ({
+        ...prev,
+        [roleId]: { name: editingRoleName, color: editingRoleColor },
+      }));
+
+      setEditRoleModalOpen(false);
+      setEditingRoleId("");
+      setEditingRoleName("");
+      setEditingRoleColor("#000000");
+    } catch (err) {
+      alert("שגיאה בעדכון תפקיד: " + (err as any).message);
+    }
+  };
+
   const createNewUser = async () => {
     setCreating(true);
     try {
@@ -181,6 +213,11 @@ export default function UsersPage() {
       return;
     }
 
+    if (roleMap[newRoleId]) {
+      alert("קיים כבר תפקיד עם מזהה זה");
+      return;
+    }
+
     try {
       await setDoc(doc(db, "roles", newRoleId), {
         name: newRoleName,
@@ -195,6 +232,7 @@ export default function UsersPage() {
       setNewRoleId("");
       setNewRoleName("");
       setNewRoleColor("");
+      setNewRoleModalOpen(false);
     } catch (err) {
       alert("שגיאה בהוספת תפקיד: " + (err as any).message);
     }
@@ -561,42 +599,26 @@ export default function UsersPage() {
         </>
       ) : (
         <>
-          <div className="mt-10 space-y-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <input
-                type="text"
-                placeholder="מזהה תפקיד (id)"
-                value={newRoleId}
-                onChange={(e) => setNewRoleId(e.target.value)}
-                className="p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#202225] text-black dark:text-white"
-              />
-              <input
-                type="text"
-                placeholder="שם התפקיד להצגה"
-                value={newRoleName}
-                onChange={(e) => setNewRoleName(e.target.value)}
-                className="p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#202225] text-black dark:text-white"
-              />
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-700 dark:text-gray-300">
-                  בחר צבע
-                </label>
-                <input
-                  type="color"
-                  value={newRoleColor}
-                  onChange={(e) => setNewRoleColor(e.target.value)}
-                  className="w-10 h-10 rounded border border-gray-300 dark:border-gray-700 cursor-pointer"
-                />
-              </div>
+          <div className="p-6 space-y-6" dir="rtl">
+            {/* Add Role Button and Search */}
+            <div className="flex gap-4 flex-wrap items-center">
               <button
-                onClick={addNewRole}
+                onClick={() => setNewRoleModalOpen(true)}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
               >
                 הוסף תפקיד
               </button>
+              <input
+                type="text"
+                placeholder="חפש לפי מזהה או שם תפקיד..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full max-w-sm p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white"
+              />
             </div>
 
-            <div className="relative overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2f3136]">
+            {/* Roles Table */}
+            <div className="relative overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2f3136]">
               <table className="w-full text-sm text-gray-900 dark:text-gray-300">
                 <thead className="bg-gray-100 dark:bg-[#202225] text-gray-900 dark:text-white">
                   <tr>
@@ -607,38 +629,169 @@ export default function UsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(roleMap).map(([roleId, { name, color }]) => (
-                    <tr
-                      key={roleId}
-                      className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#36393f]"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">{roleId}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{name}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-5 h-5 inline-block rounded-full border border-gray-400"
-                            style={{ backgroundColor: color }}
-                          ></span>
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            {color}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => deleteRole(roleId)}
-                          className="text-red-600 hover:text-red-800 text-sm"
-                        >
-                          מחק
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {Object.entries(roleMap)
+                    .filter(([id, role]) =>
+                      `${id} ${role.name}`
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                    )
+                    .map(([roleId, { name, color }]) => (
+                      <tr
+                        key={roleId}
+                        className="border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#36393f]"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {roleId}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{name}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-5 h-5 inline-block rounded-full border border-gray-400"
+                              style={{ backgroundColor: color }}
+                            ></span>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              {color}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => {
+                              setEditingRoleId(roleId);
+                              setEditingRoleName(name);
+                              setEditingRoleColor(color);
+                              setEditRoleModalOpen(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm mx-2"
+                          >
+                            ערוך
+                          </button>
+                          <button
+                            onClick={() => deleteRole(roleId)}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            מחק
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
           </div>
+
+          {/* Add Role Modal */}
+          {newRoleModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
+              <div className="bg-white text-black dark:bg-[#2f3136] dark:text-white p-6 rounded-lg shadow-xl w-full max-w-md">
+                <h2 className="text-2xl font-semibold mb-6">הוספת תפקיד חדש</h2>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+                    מזהה תפקיד
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoleId}
+                    onChange={(e) => setNewRoleId(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+                    שם להצגה
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoleName}
+                    onChange={(e) => setNewRoleName(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
+                    בחר צבע
+                  </label>
+                  <HexColorPicker
+                    color={newRoleColor}
+                    onChange={setNewRoleColor}
+                  />
+                  <div
+                    className="mt-2 w-6 h-6 rounded border border-gray-400 dark:border-gray-600"
+                    style={{ backgroundColor: newRoleColor }}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setNewRoleModalOpen(false)}
+                    className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white"
+                  >
+                    ביטול
+                  </button>
+                  <button
+                    onClick={addNewRole}
+                    className="px-4 py-2 rounded bg-green-600 hover:bg-green-500 text-white"
+                  >
+                    צור
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Role Modal */}
+          {editRoleModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
+              <div className="bg-white text-black dark:bg-[#2f3136] dark:text-white p-6 rounded-lg shadow-xl w-full max-w-md">
+                <h2 className="text-2xl font-semibold mb-6">עריכת תפקיד</h2>
+
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+                    שם להצגה
+                  </label>
+                  <input
+                    type="text"
+                    value={editingRoleName}
+                    onChange={(e) => setEditingRoleName(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#202225] text-black dark:text-white p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
+                    בחר צבע
+                  </label>
+                  <HexColorPicker
+                    color={editingRoleColor}
+                    onChange={setEditingRoleColor}
+                  />
+                  <div
+                    className="mt-2 w-6 h-6 rounded border border-gray-400 dark:border-gray-600"
+                    style={{ backgroundColor: editingRoleColor }}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setEditRoleModalOpen(false)}
+                    className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white"
+                  >
+                    ביטול
+                  </button>
+                  <button
+                    onClick={() => updateRole(editingRoleId)}
+                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white"
+                  >
+                    שמור
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
