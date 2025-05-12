@@ -734,7 +734,7 @@ export default function UsersPage() {
                   </button>
                   <button
                     onClick={addNewRole}
-                    className="px-4 py-2 rounded bg-green-600 hover:bg-green-500 text-white"
+                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
                   >
                     צור
                   </button>
