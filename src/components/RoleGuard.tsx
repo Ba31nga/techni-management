@@ -2,8 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { TABS } from "@/lib/tabsConfig";
+import { useEffect, useState, useMemo } from "react";
 import AccessDenied from "./AccessDenied";
 import { db } from "@/lib/firebase";
 import {
@@ -11,7 +10,8 @@ import {
   query,
   where,
   getDocs,
-  DocumentData,
+  getDoc,
+  doc as firestoreDoc,
 } from "firebase/firestore";
 
 export default function RoleGuard({ children }: { children: React.ReactNode }) {
@@ -21,77 +21,87 @@ export default function RoleGuard({ children }: { children: React.ReactNode }) {
   const [firebaseAuthorized, setFirebaseAuthorized] = useState<boolean | null>(
     null
   );
+  const [hasMounted, setHasMounted] = useState(false);
 
-  const userRoles = userData?.roles || [];
+  const userId = userData?.uid ?? "";
+  const userRoles = useMemo(
+    () => (userData?.roles || []).map((r: string) => r.toLowerCase()),
+    [userData?.roles]
+  );
 
-  // Redirect to login if not authenticated
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push(`/login?redirect=${pathname}`);
     }
-  }, [loading, user, router]);
+  }, [loading, user, pathname, router]);
 
-  // Load dynamic permissions from Firestore
   useEffect(() => {
-    const fetchPagePermissions = async () => {
+    const fetchPermissions = async () => {
       if (!user || !pathname) return;
 
-      const tab = TABS.sort((a, b) => b.path.length - a.path.length).find((t) =>
-        pathname.startsWith(t.path)
-      );
-
-      if (!tab) {
-        setFirebaseAuthorized(false);
-        return;
-      }
-
       try {
-        const q = query(collection(db, "pages"), where("path", "==", tab.path));
+        const q = query(collection(db, "pages"), where("path", "==", pathname));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-          // No document, block access
+          console.warn("No page document found for path:", pathname);
           setFirebaseAuthorized(false);
           return;
         }
 
-        const doc = snapshot.docs[0];
-        const data = doc.data() as DocumentData;
+        const pageDoc = snapshot.docs[0];
+        const data = pageDoc.data();
         const permissions = data.permissions || {};
 
-        const hasPermission = userRoles.some(
-          (role) => permissions[role]?.view === true
+        // User-specific permission takes priority
+        if (permissions.users?.[userId]?.view === true) {
+          setFirebaseAuthorized(true);
+          return;
+        }
+
+        // Role-based permissions by highest priority (lowest order wins)
+        const roleDocs = await Promise.all(
+          userRoles.map(async (roleId) => {
+            const snap = await getDoc(firestoreDoc(db, "roles", roleId));
+            return snap.exists()
+              ? { id: roleId, order: snap.data().order ?? 999 }
+              : null;
+          })
         );
 
-        setFirebaseAuthorized(hasPermission);
-      } catch (error) {
-        console.error("Failed to fetch page permissions", error);
+        const sortedRoles = roleDocs
+          .filter((r): r is { id: string; order: number } => r !== null)
+          .sort((a, b) => a.order - b.order);
+
+        for (const role of sortedRoles) {
+          if (permissions.role?.[role.id]?.view === true) {
+            setFirebaseAuthorized(true);
+            return;
+          }
+        }
+
+        // If no role or user has view permission
+        setFirebaseAuthorized(false);
+      } catch (err) {
+        console.error("Failed to load permissions:", err);
         setFirebaseAuthorized(false);
       }
     };
 
     if (!loading) {
-      fetchPagePermissions();
+      fetchPermissions();
     }
-  }, [pathname, user, userRoles, loading]);
+  }, [pathname, user, userId, userRoles.join(","), loading]);
 
-  // Wait for Firebase permission check
-  if (loading || !user || firebaseAuthorized === null) {
+  if (!hasMounted || loading || !user || firebaseAuthorized === null) {
     return <div className="p-6 text-center">טוען...</div>;
   }
 
-  // Static + dynamic permission check
-  const tab = TABS.sort((a, b) => b.path.length - a.path.length).find((t) =>
-    pathname.startsWith(t.path)
-  );
-
-  const hasStaticAccess = tab
-    ? tab.roles.some((role) => userRoles.includes(role))
-    : false;
-
-  const isAuthorized = hasStaticAccess && firebaseAuthorized;
-
-  if (!isAuthorized) {
+  if (!firebaseAuthorized) {
     return <AccessDenied />;
   }
 

@@ -1,3 +1,5 @@
+// ✅ Updated AuthContext.tsx
+
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -6,6 +8,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserData {
+  uid: string; // ✅ Added UID
   email: string;
   firstName: string;
   lastName: string;
@@ -44,7 +47,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-          setUserData(userDocSnap.data() as UserData);
+          const data = userDocSnap.data() as UserData;
+          setUserData({ ...data, uid: firebaseUser.uid }); // ✅ Inject UID
         } else {
           console.warn("No user document found in Firestore.");
           setUserData(null);
@@ -71,5 +75,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// hook לשימוש נוח בקונטקסט
 export const useAuth = () => useContext(AuthContext);

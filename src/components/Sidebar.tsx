@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import {
   LayoutDashboard,
   Calendar,
@@ -20,7 +20,6 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import clsx from "clsx";
 import { useAuth } from "@/context/AuthContext";
-import PagePermissionsModal from "@/components/PagePermissionsModal";
 
 const iconMap: Record<string, React.ElementType> = {
   דשבורד: LayoutDashboard,
@@ -34,13 +33,16 @@ const iconMap: Record<string, React.ElementType> = {
 interface PageDoc {
   displayName: string;
   path: string;
-  permissions: Record<
-    string,
-    {
-      view?: boolean;
-      edit?: boolean;
-    }
-  >;
+  permissions: {
+    role?: Record<string, { view?: boolean; edit?: boolean }>;
+    users?: Record<string, { view?: boolean; edit?: boolean }>;
+  };
+}
+
+interface RoleDoc {
+  name: string;
+  color: string;
+  order: number;
 }
 
 export default function Sidebar() {
@@ -48,32 +50,56 @@ export default function Sidebar() {
   const [open, setOpen] = useState(true);
   const { userData, loading, logout } = useAuth();
   const [visiblePages, setVisiblePages] = useState<PageDoc[]>([]);
-  const [settingsModalPath, setSettingsModalPath] = useState<string | null>(
-    null
-  );
 
-  const userRoles = (userData?.roles ?? []).map((r: string) => r.toLowerCase());
-  const isAdmin = userRoles.includes("admin");
+  const userRoles = useMemo(
+    () => (userData?.roles ?? []).map((r: string) => r.toLowerCase()),
+    [userData?.roles]
+  );
+  const userId = userData?.uid ?? "";
 
   useEffect(() => {
-    if (!loading) {
-      getVisiblePages();
-    }
-  }, [loading, userRoles]);
+    if (!loading) fetchPages();
+  }, [loading, userId, JSON.stringify(userRoles)]);
 
-  const getVisiblePages = async () => {
-    const snapshot = await getDocs(collection(db, "pages"));
-    const pages: PageDoc[] = [];
+  const fetchPages = async () => {
+    const [pagesSnap, rolesSnap] = await Promise.all([
+      getDocs(collection(db, "pages")),
+      getDocs(collection(db, "roles")),
+    ]);
 
-    snapshot.forEach((doc) => {
-      const data = doc.data() as PageDoc;
-      const hasViewPermission = userRoles.some(
-        (role) => data.permissions?.[role]?.view === true
-      );
-      if (hasViewPermission) pages.push(data);
+    const roleOrderMap: Record<string, number> = {};
+    rolesSnap.forEach((doc) => {
+      const data = doc.data() as RoleDoc;
+      roleOrderMap[doc.id.toLowerCase()] = data.order;
     });
 
-    setVisiblePages(pages);
+    const result: PageDoc[] = [];
+
+    pagesSnap.forEach((doc) => {
+      const data = doc.data() as PageDoc;
+      const userPermission = data.permissions?.users?.[userId];
+
+      if (userPermission?.view === true) {
+        result.push(data);
+        return;
+      }
+
+      let highestPriority = Infinity;
+      let hasRolePermission = false;
+
+      userRoles.forEach((role) => {
+        const perm = data.permissions?.role?.[role];
+        const order = roleOrderMap[role] ?? 999;
+        if (perm?.view && order < highestPriority) {
+          highestPriority = order;
+          hasRolePermission = true;
+        }
+      });
+
+      if (hasRolePermission) result.push(data);
+    });
+
+    setVisiblePages(result);
   };
 
   return (
@@ -122,7 +148,6 @@ export default function Sidebar() {
             visiblePages.map(({ displayName, path }) => {
               const active = pathname === path;
               const Icon = iconMap[displayName] ?? LayoutDashboard;
-
               return (
                 <div key={path} className="relative group">
                   <Link
@@ -152,23 +177,6 @@ export default function Sidebar() {
                       </span>
                     )}
                   </Link>
-
-                  {isAdmin && (
-                    <button
-                      onClick={() =>
-                        setSettingsModalPath(
-                          path === "/" ? "home" : path.replace(/^\//, "")
-                        )
-                      }
-                      title="הגדרות דף"
-                      className={clsx(
-                        "absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
-                        !open && "hidden"
-                      )}
-                    >
-                      <Settings size={16} />
-                    </button>
-                  )}
                 </div>
               );
             })
@@ -200,14 +208,6 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-
-      {settingsModalPath && (
-        <PagePermissionsModal
-          pageId={settingsModalPath}
-          isOpen={!!settingsModalPath}
-          onClose={() => setSettingsModalPath(null)}
-        />
-      )}
     </>
   );
 }

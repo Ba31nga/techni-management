@@ -14,6 +14,7 @@ import {
 import { UserData } from "@/context/AuthContext";
 import { X, Trash2 } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
+import PagePermissionsTab from "@/components/PagePermissionsTab";
 
 // TYPES
 
@@ -31,12 +32,15 @@ export default function UsersPage() {
   const [newRoleId, setNewRoleId] = useState("");
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleColor, setNewRoleColor] = useState("");
-  const [activeTab, setActiveTab] = useState<"users" | "roles">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "roles" | "pages">(
+    "users"
+  );
   const [editingRoleColor, setEditingRoleColor] = useState("#000000");
   const [editingRoleId, setEditingRoleId] = useState("");
   const [editingRoleName, setEditingRoleName] = useState("");
   const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
   const [newRoleModalOpen, setNewRoleModalOpen] = useState(false);
+  const [pages, setPages] = useState<any[]>([]);
 
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -74,6 +78,18 @@ export default function UsersPage() {
     };
 
     fetchRolesAndUsers();
+  }, []);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      const snapshot = await getDocs(collection(db, "pages"));
+      const pageList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPages(pageList);
+    };
+    fetchPages();
   }, []);
 
   const updateUserDetails = async (updatedUser: UserData) => {
@@ -128,6 +144,13 @@ export default function UsersPage() {
     }
   };
 
+  const userMap = users.reduce((acc, user) => {
+    acc[user.id] = {
+      fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+    };
+    return acc;
+  }, {} as Record<string, { fullName: string }>);
+
   const updateRole = async (roleId: string) => {
     if (!roleId || !editingRoleName || !editingRoleColor) {
       alert("אנא מלא את כל השדות");
@@ -176,7 +199,7 @@ export default function UsersPage() {
       setUsers((prev) => [
         ...prev,
         {
-          id: data.uid,
+          uid: data.uid,
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
@@ -283,9 +306,19 @@ export default function UsersPage() {
         >
           תפקידים
         </button>
+        <button
+          onClick={() => setActiveTab("pages")}
+          className={`px-4 py-2 rounded-t-md font-medium border-b-2 transition-colors duration-150 ${
+            activeTab === "pages"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-600 dark:text-gray-300 hover:text-blue-500"
+          }`}
+        >
+          דפים
+        </button>
       </div>
 
-      {activeTab === "users" ? (
+      {activeTab === "users" && (
         <>
           <div className="p-6 space-y-6" dir="rtl">
             <div className="flex gap-4 flex-wrap items-center">
@@ -597,7 +630,9 @@ export default function UsersPage() {
             )}
           </div>
         </>
-      ) : (
+      )}
+
+      {activeTab == "roles" && (
         <>
           <div className="p-6 space-y-6" dir="rtl">
             {/* Add Role Button and Search */}
@@ -793,6 +828,10 @@ export default function UsersPage() {
             </div>
           )}
         </>
+      )}
+
+      {activeTab === "pages" && (
+        <PagePermissionsTab pages={pages} roleMap={roleMap} userMap={userMap} />
       )}
     </div>
   );
