@@ -39,22 +39,13 @@ interface Props {
 }
 
 export default function PagePermissionsTab({ pages, roleMap, userMap }: Props) {
-  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [localPages, setLocalPages] = useState<Page[]>(pages);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [selectedRoleOrUserId, setSelectedRoleOrUserId] = useState<
     string | null
   >(null);
-  const [previousSelection, setPreviousSelection] = useState<string | null>(
-    null
-  );
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 3000);
-  };
 
   const selectedPage = localPages.find((p) => p.id === selectedPageId);
   const isUser =
@@ -166,7 +157,7 @@ export default function PagePermissionsTab({ pages, roleMap, userMap }: Props) {
   };
 
   const searchResults = Object.entries({ ...roleMap, ...userMap })
-    .filter(([id, data]) => {
+    .filter(([, data]) => {
       const name = "fullName" in data ? data.fullName : data.name;
       return name.includes(searchQuery);
     })
