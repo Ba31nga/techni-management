@@ -21,7 +21,8 @@ import PagePermissionsTab from "@/components/PagePermissionsTab";
 type RoleMap = Record<string, { color: string; name: string }>;
 
 export default function UsersPage() {
-  const { user, userData } = useAuth();
+  const [editingRoleOrder, setEditingRoleOrder] = useState<number>(0);
+  const { user } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
