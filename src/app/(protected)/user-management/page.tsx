@@ -390,7 +390,7 @@ export default function UsersPage() {
                       </td>
                       <td className="px-6 py-4 align-top">
                         <div className="flex flex-wrap gap-1 justify-start">
-                          {user.roles.map((role) => {
+                          {user.roles.map((role, i) => {
                             const color = roleMap[role]?.color || "#4b5563";
                             const name = roleMap[role]?.name || role;
 
@@ -406,7 +406,7 @@ export default function UsersPage() {
 
                             return (
                               <span
-                                key={role}
+                                key={`${user.id}-${role}-${i}`}
                                 className="px-3 py-1 rounded-full text-xs font-medium"
                                 style={{
                                   backgroundColor: color,
