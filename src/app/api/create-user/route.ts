@@ -2,8 +2,8 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { NextResponse } from "next/server";
-import serviceAccount from "@/lib/firebase-admin/serviceAccountKey.json";
 
+// Initialize Firebase Admin SDK if not already initialized
 if (!getApps().length) {
   initializeApp({
     credential: cert({
@@ -13,9 +13,10 @@ if (!getApps().length) {
     }),
   });
 }
+
 export async function POST(req: Request) {
   try {
-    const { email, password, firstName, lastName, roles } = await req.json();
+    const { email, password, firstName, lastName } = await req.json();
 
     if (!email || !password || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -28,7 +29,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, uid: userRecord.uid });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "שגיאה לא מזוהה";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
