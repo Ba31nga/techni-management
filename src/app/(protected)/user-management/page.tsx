@@ -41,21 +41,37 @@ export default function UsersPage() {
   const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
   const [newRoleModalOpen, setNewRoleModalOpen] = useState(false);
 
+  interface PagePermissions {
+    role?: Record<string, { view?: boolean; edit?: boolean }>;
+    users?: Record<string, { view?: boolean; edit?: boolean }>;
+  }
+
   interface PageType {
     id: string;
     displayName?: string;
     path?: string;
-    permissions?: any;
+    permissions?: PagePermissions;
   }
+
+  type NewUser = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    firstTimeLogin: boolean;
+    roles: string[];
+  };
+
   const [pages, setPages] = useState<PageType[]>([]);
 
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
+  const [newUser, setNewUser] = useState<NewUser>({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     roles: ["user"],
+    firstTimeLogin: true,
   });
 
   useEffect(() => {
@@ -221,6 +237,7 @@ export default function UsersPage() {
         lastName: "",
         email: "",
         password: "",
+        firstTimeLogin: true,
         roles: ["user"],
       });
     } catch (err) {
@@ -585,7 +602,14 @@ export default function UsersPage() {
                         </label>
                         <input
                           type={field === "password" ? "password" : "text"}
-                          value={(newUser as any)[field]}
+                          value={
+                            newUser[
+                              field as keyof Omit<
+                                NewUser,
+                                "roles" | "firstTimeLogin"
+                              >
+                            ]
+                          }
                           onChange={(e) =>
                             setNewUser({ ...newUser, [field]: e.target.value })
                           }
