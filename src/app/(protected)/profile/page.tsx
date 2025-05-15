@@ -57,9 +57,10 @@ export default function ProfilePage() {
       setPasswordInput("");
       setConfirmPasswordInput("");
       setMessage({ type: "success", text: "הפרטים עודכנו בהצלחה." });
-    } catch (error: any) {
-      console.error(error);
-      setMessage({ type: "error", text: error.message });
+    } catch (error) {
+      const err = error as Error;
+      console.error(err);
+      setMessage({ type: "error", text: err.message });
     }
   };
 
@@ -77,7 +78,10 @@ export default function ProfilePage() {
     "mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-right border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
 
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-8 px-4" dir="rtl">
+    <main
+      className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-8 px-4"
+      dir="rtl"
+    >
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <div className="flex flex-col md:flex-row items-center md:items-start">
           <div className="flex-shrink-0">
@@ -88,7 +92,9 @@ export default function ProfilePage() {
             />
           </div>
           <div className="mt-4 md:mt-0 md:mr-6 text-center md:text-right flex-1">
-            <h2 className="text-2xl font-semibold">{firstName} {lastName}</h2>
+            <h2 className="text-2xl font-semibold">
+              {firstName} {lastName}
+            </h2>
             <p className="text-gray-500 dark:text-gray-300">
               {roles.map((role) => roleTranslations[role] || role).join(", ")}
             </p>
@@ -116,7 +122,9 @@ export default function ProfilePage() {
             <p className="mt-1">{lastName}</p>
           </div>
           <div className="md:col-span-2">
-            <label htmlFor="email" className="block text-sm font-medium">אימייל</label>
+            <label htmlFor="email" className="block text-sm font-medium">
+              אימייל
+            </label>
             {!editMode ? (
               <p className="mt-1">{user.email}</p>
             ) : (
@@ -134,7 +142,9 @@ export default function ProfilePage() {
           {editMode && (
             <>
               <div className="md:col-span-2 relative">
-                <label htmlFor="password" className="block text-sm font-medium">סיסמה</label>
+                <label htmlFor="password" className="block text-sm font-medium">
+                  סיסמה
+                </label>
                 <div className="relative">
                   <input
                     id="password"
@@ -155,7 +165,12 @@ export default function ProfilePage() {
               </div>
 
               <div className="md:col-span-2">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium">אישור סיסמה</label>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium"
+                >
+                  אישור סיסמה
+                </label>
                 <input
                   id="confirmPassword"
                   type={showPasswords ? "text" : "password"}

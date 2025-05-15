@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  getFirestore,
   collection,
   query,
   where,
@@ -10,6 +9,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/lib/firebase";
 

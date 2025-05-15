@@ -21,7 +21,6 @@ import PagePermissionsTab from "@/components/PagePermissionsTab";
 type RoleMap = Record<string, { color: string; name: string }>;
 
 export default function UsersPage() {
-  const [editingRoleOrder, setEditingRoleOrder] = useState<number>(0);
   const { user } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +40,14 @@ export default function UsersPage() {
   const [editingRoleName, setEditingRoleName] = useState("");
   const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
   const [newRoleModalOpen, setNewRoleModalOpen] = useState(false);
-  const [pages, setPages] = useState<any[]>([]);
+
+  interface PageType {
+    id: string;
+    displayName?: string;
+    path?: string;
+    permissions?: any;
+  }
+  const [pages, setPages] = useState<PageType[]>([]);
 
   const [newUserModalOpen, setNewUserModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -174,7 +180,8 @@ export default function UsersPage() {
       setEditingRoleName("");
       setEditingRoleColor("#000000");
     } catch (err) {
-      alert("שגיאה בעדכון תפקיד: " + (err as any).message);
+      const message = err instanceof Error ? err.message : "שגיאה לא מזוהה";
+      alert("שגיאה בעדכון תפקיד: " + message);
     }
   };
 
@@ -217,7 +224,8 @@ export default function UsersPage() {
         roles: ["user"],
       });
     } catch (err) {
-      alert("שגיאה ביצירת משתמש: " + (err as any).message);
+      const message = err instanceof Error ? err.message : "שגיאה לא מזוהה";
+      alert("שגיאה ביצירת משתמש: " + message);
     } finally {
       setCreating(false);
     }
@@ -258,7 +266,9 @@ export default function UsersPage() {
       setNewRoleColor("");
       setNewRoleModalOpen(false);
     } catch (err) {
-      alert("שגיאה בהוספת תפקיד: " + (err as any).message);
+      const message =
+        err instanceof Error ? err.message : "שגיאה בהוספת תפקיד: ";
+      alert("שגיאה בהוספת תפקיד: " + message);
     }
   };
 
@@ -274,7 +284,9 @@ export default function UsersPage() {
         return newMap;
       });
     } catch (err) {
-      alert("שגיאה במחיקת תפקיד: " + (err as any).message);
+      const message =
+        err instanceof Error ? err.message : "שגיאה במחיקת תפקיד: ";
+      alert("שגיאה במחיקת תפקיד: " + message);
     }
   };
 
