@@ -175,8 +175,9 @@ export default function MakasimManagementPage() {
             }`}
             onClick={() => setActiveTab("mamah")}
           >
-            ממ"חים
+            ממ&quot;חים
           </button>
+
           <button
             className={`px-4 py-2 rounded-md font-semibold text-sm shadow transition-colors ${
               activeTab === "makas"
@@ -185,7 +186,7 @@ export default function MakasimManagementPage() {
             }`}
             onClick={() => setActiveTab("makas")}
           >
-            מק"סים
+            מק&quot;סים
           </button>
         </div>
       )}
@@ -193,7 +194,7 @@ export default function MakasimManagementPage() {
       {(currentUserData.role === "mamah" || activeTab === "makas") && (
         <section>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            רשימת מק"סים
+            רשימת מק&quot;סים
           </h2>
           <input
             type="text"
@@ -270,8 +271,9 @@ export default function MakasimManagementPage() {
         ["admin", "madar"].includes(currentUserData.role) && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              רשימת ממ"חים
+              רשימת ממ&quot;חים
             </h2>
+
             <input
               type="text"
               placeholder="חפש לפי שם..."
@@ -322,7 +324,7 @@ export default function MakasimManagementPage() {
 
       {currentUserData.role === "mamah" && !currentUserData.layer && (
         <div className="text-yellow-600 dark:text-yellow-400">
-          יש להגדיר שכבה כדי לצפות במק"סים שלך.
+          יש להגדיר שכבה כדי לצפות במק&quot;סים שלך.
         </div>
       )}
     </div>
