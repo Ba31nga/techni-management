@@ -1,5 +1,3 @@
-// ✅ Updated AuthContext.tsx
-
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -14,7 +12,7 @@ export interface UserData {
   lastName: string;
   roles: string[];
   needsPasswordChange: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AuthContextValue {

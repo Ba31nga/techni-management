@@ -116,7 +116,7 @@ export default function UsersPage() {
   }, []);
 
   const updateUserDetails = async (updatedUser: UserData) => {
-    await updateDoc(doc(db, "users", updatedUser.id), {
+    await updateDoc(doc(db, "users", updatedUser.uid), {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
@@ -168,7 +168,7 @@ export default function UsersPage() {
   };
 
   const userMap = users.reduce((acc, user) => {
-    acc[user.id] = {
+    acc[user.uid] = {
       fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
     };
     return acc;
@@ -379,7 +379,7 @@ export default function UsersPage() {
                 <tbody>
                   {filteredUsers.map((user) => (
                     <tr
-                      key={user.id}
+                      key={user.uid}
                       className="border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#36393f]"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -422,7 +422,7 @@ export default function UsersPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => deleteUser(user.id, user.email)}
+                            onClick={() => deleteUser(user.uid, user.email)}
                             className="p-1 rounded-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800"
                             title="מחק משתמש"
                           >
