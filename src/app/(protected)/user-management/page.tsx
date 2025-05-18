@@ -406,7 +406,7 @@ export default function UsersPage() {
 
                             return (
                               <span
-                                key={`${user.id}-${role}-${i}`}
+                                key={`${user.id}-${role}`}
                                 className="px-3 py-1 rounded-full text-xs font-medium"
                                 style={{
                                   backgroundColor: color,
