@@ -5,30 +5,34 @@ import { updateEmail, updatePassword } from "firebase/auth";
 import { useAuth } from "@/context/AuthContext";
 import { roleTranslations } from "@/lib/roleTranslations";
 
+// profile page component
 export default function ProfilePage() {
   const { user, userData, loading } = useAuth();
 
-  const [editMode, setEditMode] = useState(false);
-  const [emailInput, setEmailInput] = useState("");
-  const [passwordInput, setPasswordInput] = useState("");
-  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
-  const [showPasswords, setShowPasswords] = useState(false);
+  const [editMode, setEditMode] = useState(false); // toggle edit mode
+  const [emailInput, setEmailInput] = useState(""); // input value for email
+  const [passwordInput, setPasswordInput] = useState(""); // input value for new password
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState(""); // input for confirming new password
+  const [showPasswords, setShowPasswords] = useState(false); // toggle password visibility
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
-  } | null>(null);
+  } | null>(null); // feedback message
 
+  // set initial email value from user
   useEffect(() => {
     if (user && user.email) {
       setEmailInput(user.email);
     }
   }, [user]);
 
+  // enter edit mode
   const handleEdit = () => {
     setEditMode(true);
     setMessage(null);
   };
 
+  // cancel editing and reset fields
   const handleCancel = () => {
     setEditMode(false);
     setEmailInput(user?.email || "");
@@ -37,6 +41,7 @@ export default function ProfilePage() {
     setMessage(null);
   };
 
+  // save updated email and password
   const handleSave = async () => {
     if (!user) return;
     setMessage(null);
@@ -59,15 +64,16 @@ export default function ProfilePage() {
       setMessage({ type: "success", text: "הפרטים עודכנו בהצלחה." });
     } catch (error) {
       const err = error as Error;
-      console.error(err);
       setMessage({ type: "error", text: err.message });
     }
   };
 
+  // loading state
   if (loading) {
     return <div className="p-8 text-center">טוען...</div>;
   }
 
+  // unauthorized access
   if (!user || !userData) {
     return <div className="p-8 text-center text-red-600">משתמש לא מחובר</div>;
   }
@@ -84,6 +90,7 @@ export default function ProfilePage() {
     >
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <div className="flex flex-col md:flex-row items-center md:items-start">
+          {/* user profile image */}
           <div className="flex-shrink-0">
             <img
               src={user.photoURL || "/default-profile.png"}
@@ -91,6 +98,8 @@ export default function ProfilePage() {
               className="w-24 h-24 rounded-full object-cover"
             />
           </div>
+
+          {/* user name and roles */}
           <div className="mt-4 md:mt-0 md:mr-6 text-center md:text-right flex-1">
             <h2 className="text-2xl font-semibold">
               {firstName} {lastName}
@@ -99,6 +108,8 @@ export default function ProfilePage() {
               {roles.map((role) => roleTranslations[role] || role).join(", ")}
             </p>
           </div>
+
+          {/* edit button */}
           {!editMode && (
             <div className="mt-4 md:mt-0 md:ml-auto">
               <button
@@ -112,6 +123,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* user info section */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium">שם פרטי</label>
@@ -121,6 +133,8 @@ export default function ProfilePage() {
             <label className="block text-sm font-medium">שם משפחה</label>
             <p className="mt-1">{lastName}</p>
           </div>
+
+          {/* email field */}
           <div className="md:col-span-2">
             <label htmlFor="email" className="block text-sm font-medium">
               אימייל
@@ -139,6 +153,7 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* password inputs (only in edit mode) */}
           {editMode && (
             <>
               <div className="md:col-span-2 relative">
@@ -184,6 +199,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* display user roles */}
         <div className="mt-6">
           <label className="block text-sm font-medium">הרשאות</label>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -198,6 +214,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* success or error message */}
         {message && (
           <div
             className={`mt-4 p-4 rounded-md ${
@@ -210,6 +227,7 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* edit mode buttons */}
         {editMode && (
           <div className="mt-6 flex justify-end space-x-3 space-x-reverse">
             <button

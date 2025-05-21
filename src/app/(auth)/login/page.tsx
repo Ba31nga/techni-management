@@ -5,23 +5,25 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
+// login page component
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(""); // state for user email
+  const [password, setPassword] = useState(""); // state for user password
+  const [error, setError] = useState(""); // state for error messages
+  const [loading, setLoading] = useState(false); // state to indicate loading status
 
+  // handles form submission and attempts login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password); // firebase login
       router.push("/"); // redirect after login
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError(err.message); // set error if login fails
       } else {
         setError("Login failed");
       }
@@ -50,7 +52,7 @@ export default function LoginPage() {
           type="email"
           placeholder="אימייל"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)} // updates email state
           className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded p-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
@@ -59,7 +61,7 @@ export default function LoginPage() {
           type="password"
           placeholder="סיסמה"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)} // updates password state
           className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded p-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />

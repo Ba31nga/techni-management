@@ -8,6 +8,7 @@ import { db } from "@/lib/firebase";
 import { roleTranslations } from "@/lib/roleTranslations";
 import Image from "next/image";
 
+// interface representing a user profile
 interface UserProfile {
   firstName: string;
   lastName: string;
@@ -16,15 +17,17 @@ interface UserProfile {
   roles?: string[];
 }
 
+// user profile page component
 export default function UserProfilePage() {
   const { userId } = useParams();
   const { user } = useAuth();
 
-  const [profileData, setProfileData] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null); // profile data state
+  const [loading, setLoading] = useState(true); // loading state
 
-  const isCurrentUser = user?.uid === userId;
+  const isCurrentUser = user?.uid === userId; // check if viewing own profile
 
+  // fetch user profile from firestore
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,20 +35,21 @@ export default function UserProfilePage() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setProfileData(docSnap.data() as UserProfile);
+          setProfileData(docSnap.data() as UserProfile); // set profile data
         } else {
-          setProfileData(null);
+          setProfileData(null); // no profile found
         }
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        // error was removed as per request to strip debugging
       } finally {
-        setLoading(false);
+        setLoading(false); // update loading status
       }
     };
 
     fetchData();
   }, [userId]);
 
+  // show loading or error states
   if (loading) return <div className="p-6 text-center">טוען פרופיל...</div>;
   if (!profileData)
     return <div className="p-6 text-center text-red-600">פרופיל לא נמצא</div>;
@@ -57,6 +61,7 @@ export default function UserProfilePage() {
     >
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <div className="flex items-center gap-4">
+          {/* user profile image */}
           <Image
             src={profileData.photoURL || "/default-profile.png"}
             alt="User profile"
@@ -65,15 +70,18 @@ export default function UserProfilePage() {
             className="rounded-full object-cover"
           />
           <div>
+            {/* user full name */}
             <h1 className="text-2xl font-semibold">
               {profileData.firstName} {profileData.lastName}
             </h1>
+            {/* user email */}
             <p className="text-gray-500 dark:text-gray-300">
               {profileData.email}
             </p>
           </div>
         </div>
 
+        {/* user roles */}
         <div className="mt-6">
           <label className="block text-sm font-medium">הרשאות</label>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -88,6 +96,7 @@ export default function UserProfilePage() {
           </div>
         </div>
 
+        {/* action button depending on viewer */}
         <div className="mt-6 text-right">
           {isCurrentUser ? (
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">

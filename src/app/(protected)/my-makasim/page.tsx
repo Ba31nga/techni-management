@@ -13,6 +13,7 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/lib/firebase";
 
+// define the user type interface
 interface UserType {
   id: string;
   firstName: string;
@@ -23,14 +24,16 @@ interface UserType {
   classNumber?: string;
 }
 
+// main page component for managing mamah and makas users
 export default function MakasimManagementPage() {
-  const [currentUserData, setCurrentUserData] = useState<UserType | null>(null);
-  const [mamahUsers, setMamahUsers] = useState<UserType[]>([]);
-  const [makasUsers, setMakasUsers] = useState<UserType[]>([]);
-  const [activeTab, setActiveTab] = useState<"mamah" | "makas">("makas");
-  const [searchMamah, setSearchMamah] = useState("");
-  const [searchMakas, setSearchMakas] = useState("");
+  const [currentUserData, setCurrentUserData] = useState<UserType | null>(null); // holds current logged in user's data
+  const [mamahUsers, setMamahUsers] = useState<UserType[]>([]); // mamah users list
+  const [makasUsers, setMakasUsers] = useState<UserType[]>([]); // makas users list
+  const [activeTab, setActiveTab] = useState<"mamah" | "makas">("makas"); // current active tab
+  const [searchMamah, setSearchMamah] = useState(""); // search input for mamah users
+  const [searchMakas, setSearchMakas] = useState(""); // search input for makas users
 
+  // fetch current user's data from firestore
   useEffect(() => {
     let unsubscribeUserDoc: (() => void) | null = null;
     const unsubscribeAuth = onAuthStateChanged(getAuth(), (user) => {
@@ -63,6 +66,7 @@ export default function MakasimManagementPage() {
     };
   }, []);
 
+  // fetch mamah and makas users based on current user role
   useEffect(() => {
     let unsubscribeMamah: (() => void) | null = null;
     let unsubscribeMakas: (() => void) | null = null;
@@ -70,6 +74,7 @@ export default function MakasimManagementPage() {
       const usersCol = collection(db, "users");
 
       if (["admin", "madar"].includes(currentUserData.role)) {
+        // admin or madar sees all mamah and makas
         unsubscribeMamah = onSnapshot(
           query(usersCol, where("roles", "array-contains", "mamah")),
           (snapshot) => {
@@ -106,6 +111,7 @@ export default function MakasimManagementPage() {
           }
         );
       } else if (currentUserData.role === "mamah") {
+        // mamah sees only makas from same layer
         setMamahUsers([]);
         if (currentUserData.layer) {
           unsubscribeMakas = onSnapshot(
@@ -141,21 +147,29 @@ export default function MakasimManagementPage() {
     };
   }, [currentUserData]);
 
+  // update user's layer field in firestore
   const handleLayerChange = async (userId: string, newLayer: string) => {
     await updateDoc(doc(db, "users", userId), { layer: newLayer });
   };
+
+  // update user's classNumber field in firestore
   const handleClassChange = async (userId: string, newClass: string) => {
     await updateDoc(doc(db, "users", userId), { classNumber: newClass });
   };
 
+  // possible layer and class values
   const layers = ["ט", "י", "יא", "יב"];
   const classNumbers = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
+  // loading state
   if (!currentUserData)
     return <div className="text-gray-700 dark:text-white">טוען נתונים...</div>;
+
+  // access restriction for unauthorized users
   if (!["admin", "madar", "mamah"].includes(currentUserData.role))
     return <div className="text-red-600 dark:text-red-400">אין גישה.</div>;
 
+  // filter search results
   const filteredMamah = mamahUsers.filter((user) =>
     user.name.includes(searchMamah)
   );
@@ -165,6 +179,7 @@ export default function MakasimManagementPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8" dir="rtl">
+      {/* tab navigation between mamah and makas */}
       {["admin", "madar"].includes(currentUserData.role) && (
         <div className="flex space-x-2 mb-4 rtl:space-x-reverse">
           <button
@@ -191,6 +206,7 @@ export default function MakasimManagementPage() {
         </div>
       )}
 
+      {/* makas list section */}
       {(currentUserData.role === "mamah" || activeTab === "makas") && (
         <section>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -267,6 +283,7 @@ export default function MakasimManagementPage() {
         </section>
       )}
 
+      {/* mamah list section */}
       {activeTab === "mamah" &&
         ["admin", "madar"].includes(currentUserData.role) && (
           <section>
@@ -322,6 +339,7 @@ export default function MakasimManagementPage() {
           </section>
         )}
 
+      {/* show warning if mamah has no layer set */}
       {currentUserData.role === "mamah" && !currentUserData.layer && (
         <div className="text-yellow-600 dark:text-yellow-400">
           יש להגדיר שכבה כדי לצפות במק&quot;סים שלך.
